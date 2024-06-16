@@ -10,15 +10,34 @@ const getTouristEntityById = async (id) => {
     return rows[0];
 };
 
+// const getTouristEntitiesByCategory = async (categoryId) => {
+//     const [rows] = await pool.query('SELECT * FROM tourist_entities WHERE category_id = ?', [categoryId]);
+//     return rows;
+// };
+
 const getTouristEntitiesByCategory = async (categoryId) => {
-    const [rows] = await pool.query('SELECT * FROM tourist_entities WHERE category_id = ?', [categoryId]);
-    return rows;
+  const query = `
+      SELECT te.*, c.name AS category_name
+      FROM tourist_entities te
+      JOIN categories c ON te.category_id = c.id
+      WHERE te.category_id = ?
+  `;
+  const [rows] = await pool.query(query, [categoryId]);
+  return rows;
 };
 
 const getTouristEntitiesByDistrict = async (districtId) => {
-    const [rows] = await pool.query('SELECT * FROM tourist_entities WHERE district_id = ?', [districtId]);
-    return rows;
+  const query = `
+      SELECT te.*, d.name AS district_name
+      FROM tourist_entities te
+      INNER JOIN district d ON te.district_id = d.id
+      WHERE te.district_id = ?
+  `;
+  const [rows] = await pool.query(query, [districtId]);
+  return rows;
 };
+
+
 
 const getTouristEntitiesBySeason = async (seasonId) => {
     const query = `
