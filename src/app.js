@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import touristEntityRoutes from './routes/touristEntityRoutes.js';
+import adminRoutes from './routes/adminRoutes.js'; 
 import pool from './config/db.js';  
 
 dotenv.config();
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.use('/', touristEntityRoutes);
+app.use('/admin', adminRoutes);
 
 
 pool.getConnection()
