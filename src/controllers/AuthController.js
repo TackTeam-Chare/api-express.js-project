@@ -52,27 +52,7 @@ const storeToken = async (adminId, token) => {
         throw error;
     }
 };
-// const login = async (req, res) => {
-//     const { username, password } = req.body;
-//     try {
-//         // Fetch the user from the database
-//         const [rows] = await pool.query('SELECT * FROM admin WHERE username = ?', [username]);
-//         const admin = rows[0];
 
-//         // Check if the user exists and the password matches
-//         if (admin && await bcrypt.compare(password, admin.password)) {
-//             // Generate a token if the username and password match
-//             const token = jwt.sign({ id: admin.id, username: admin.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
-//             res.json({ token });
-//         } else {
-//             res.status(401).json({ error: 'Invalid username or password' });
-//         }
-//     } catch (error) {
-//         // Handle any other errors
-//         console.error('Login error:', error);
-//         res.status(500).json({ error: error.message });
-//     }
-// };
 const login = async (req, res) => {
     const { username, password } = req.body;
     try {
@@ -101,19 +81,13 @@ const login = async (req, res) => {
 };
 
 
-// const logout = (req, res) => {
-//     // Optionally, log the logout action for auditing purposes
-//     console.log(`Admin ID ${req.user.id} logged out.`);
-//     // Send a success response
-//     res.json({ message: 'Logout successful' });
-// };
 
 const logout = async (req, res) => {
     const adminId = req.user.id; // Assuming `req.user.id` is set by `authenticateJWT` middleware
 
     try {
         // Clear the JWT token in the database
-        await pool.query('UPDATE admin_tokens SET token = NULL WHERE id = ?', [adminId]);
+        await pool.query('UPDATE admin_tokens SET token = NULL WHERE admin_id = ?', [adminId]);
 
         res.json({ message: 'Logout successful' });
     } catch (error) {
@@ -121,7 +95,6 @@ const logout = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
 
 
 const getProfile = async (req, res) => {
