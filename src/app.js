@@ -17,7 +17,7 @@ app.use(bodyParser.json());
 
 // User
 app.use('/', touristEntityRoutes);
-// app.use('/admin', adminRoutes);
+
 
 // Admin
 app.use('/auth', authRoutes);
