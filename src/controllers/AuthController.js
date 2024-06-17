@@ -45,6 +45,13 @@ const login = async (req, res) => {
     }
 };
 
+const logout = (req, res) => {
+    // Optionally, log the logout action for auditing purposes
+    console.log(`Admin ID ${req.user.id} logged out.`);
+    // Send a success response
+    res.json({ message: 'Logout successful' });
+};
+
 const getProfile = async (req, res) => {
     try {
         const adminId = req.user.id;
@@ -109,4 +116,4 @@ const updateProfile = async (req, res) => {
 
 
 
-export default { createAdmin,login,getProfile,updateProfile };
+export default { createAdmin,login,getProfile,updateProfile,logout  };

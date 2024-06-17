@@ -23,16 +23,6 @@ const getById = async (id) => {
 };
 
 
-// const create = async (touristEntity) => {
-//     const { name, description, location, latitude, longitude, district_id, category_id } = touristEntity;
-//     try {
-//         const result = await pool.query('INSERT INTO tourist_entities (name, description, location, latitude, longitude, district_id, category_id) VALUES (?, ?, ?, ?, ?, ?, ?)', [name, description, location, latitude, longitude, district_id, category_id]);
-//         return result.insertId;
-//     } catch (error) {
-//         throw error;
-//     }
-// };
-// Create a new tourist entity
 const create = async (touristEntity) => {
     const {name, description, location, latitude, longitude, district_id, category_id, created_by } = touristEntity;
     if (!created_by) {

@@ -13,8 +13,10 @@ const authenticateJWT = (req, res, next) => {
         req.user = decoded;
         next();
     } catch (error) {
+        next(error)
         res.status(401).json({ message: 'Invalid token.' });
     }
 };
 
 export default authenticateJWT;
+
