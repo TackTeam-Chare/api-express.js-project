@@ -69,10 +69,14 @@ const deleteTouristEntity = async (req, res) => {
     }
 };
 
+
+
 export  default{
     getAllTouristEntities,
     getTouristEntityById,
     createTouristEntity,
     updateTouristEntity,
-    deleteTouristEntity
+    deleteTouristEntity,
+
+
 };

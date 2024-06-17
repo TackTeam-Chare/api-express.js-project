@@ -5,7 +5,8 @@ import dotenv from 'dotenv';
 import touristEntityRoutes from './routes/touristEntityRoutes.js';
 import adminRoutes from './routes/adminRoutes.js'; 
 import pool from './config/db.js';  
-
+import authRoutes from './routes/authRoutes.js';
+import authenticateJWT from './middleware/authMiddleware.js'; 
 dotenv.config();
 
 const app = express();
@@ -15,8 +16,11 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.use('/', touristEntityRoutes);
-app.use('/admin', adminRoutes);
+// app.use('/admin', adminRoutes);
 
+app.use('/auth', authRoutes);
+app.use('/admin', authenticateJWT, adminRoutes);
+app.use('/', touristEntityRoutes);
 
 pool.getConnection()
   .then(conn => {

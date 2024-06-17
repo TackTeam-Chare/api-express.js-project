@@ -1,10 +1,11 @@
-// routes/adminRoutes.js
 import express from 'express';
 import AdminController from '../controllers/AdminController.js';
+import authenticateJWT from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Routes for tourist entity management by admin
+router.use(authenticateJWT); // Add this line to apply middleware to all routes
+
 router.get('/tourist-entities', AdminController.getAllTouristEntities);
 router.get('/tourist-entities/:id', AdminController.getTouristEntityById);
 router.post('/tourist-entities', AdminController.createTouristEntity);

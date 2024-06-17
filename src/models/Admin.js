@@ -34,7 +34,6 @@ const getById = async (id) => {
 // };
 // Create a new tourist entity
 const create = async (touristEntity) => {
-    
     const {name, description, location, latitude, longitude, district_id, category_id, created_by } = touristEntity;
     if (!created_by) {
         throw new Error("created_by cannot be null");
@@ -45,7 +44,6 @@ const create = async (touristEntity) => {
     } catch (error) {
         throw error;
     }
-    
 };
 // Update a tourist entity
 const update = async (id, touristEntity) => {
@@ -68,10 +66,12 @@ const remove = async (id) => {
     }
 };
 
+
 export default {
     getAll,
     getById,
     create,
     update,
-    remove
+    remove,
+
 };
