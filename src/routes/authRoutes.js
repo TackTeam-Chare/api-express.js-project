@@ -1,13 +1,13 @@
 import express from 'express';
 import AuthController from '../controllers/AuthController.js';
-import AuthCreate from '../controllers/AuthCreate.js';
+
 
 const router = express.Router();
 
-// Route for login
+//for Login
 router.post('/login', AuthController.login);
 
-// Route for admin registration
-router.post('/register', AuthCreate.createAdmin);
+//for admin Registration
+router.post('/register', AuthController.createAdmin);
 
 export default router;

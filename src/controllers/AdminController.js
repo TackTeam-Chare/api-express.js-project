@@ -20,10 +20,14 @@ const getTouristEntityById = async (req, res) => {
         if (entity) {
             res.json(entity);
         } else {
-            res.status(404).json({ error: 'Tourist entity not found' });
+            res.status(404).json({
+                error: 'Tourist entity not found'
+            });
         }
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({
+            error: error.message
+        });
     }
 };
 
@@ -32,9 +36,14 @@ const createTouristEntity = async (req, res) => {
     const touristEntity = req.body;
     try {
         const insertId = await Admin.create(touristEntity);
-        res.json({ message: 'Tourist entity created successfully', id: insertId });
+        res.json({
+            message: 'Tourist entity created successfully',
+            id: insertId
+        });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({
+            error: error.message
+        });
     }
 };
 
@@ -45,12 +54,18 @@ const updateTouristEntity = async (req, res) => {
     try {
         const affectedRows = await Admin.update(id, touristEntity);
         if (affectedRows > 0) {
-            res.json({ message: `Tourist entity with ID ${id} updated successfully` });
+            res.json({
+                message: `Tourist entity with ID ${id} updated successfully`
+            });
         } else {
-            res.status(404).json({ error: 'Tourist entity not found' });
+            res.status(404).json({
+                error: 'Tourist entity not found'
+            });
         }
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({
+            error: error.message
+        });
     }
 };
 
@@ -60,23 +75,25 @@ const deleteTouristEntity = async (req, res) => {
     try {
         const affectedRows = await Admin.remove(id);
         if (affectedRows > 0) {
-            res.json({ message: `Tourist entity with ID ${id} deleted successfully` });
+            res.json({
+                message: `Tourist entity with ID ${id} deleted successfully`
+            });
         } else {
-            res.status(404).json({ error: 'Tourist entity not found' });
+            res.status(404).json({
+                error: 'Tourist entity not found'
+            });
         }
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({
+            error: error.message
+        });
     }
 };
 
-
-
-export  default{
+export default {
     getAllTouristEntities,
     getTouristEntityById,
     createTouristEntity,
     updateTouristEntity,
     deleteTouristEntity,
-
-
 };
