@@ -45,4 +45,68 @@ const login = async (req, res) => {
     }
 };
 
-export default { createAdmin,login };
+const getProfile = async (req, res) => {
+    try {
+        const adminId = req.user.id;
+        const [rows] = await pool.query('SELECT id, username, name FROM admin WHERE id = ?', [adminId]);
+        const admin = rows[0];
+
+        if (admin) {
+            res.json(admin);
+        } else {
+            res.status(404).json({ error: 'Admin not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// AuthController.js
+const updateProfile = async (req, res) => {
+    const { username,name, password } = req.body;
+    const adminId = req.user.id;
+
+    try {
+        let updates = [];
+        let values = [];
+
+        // Update the name if provided
+        if (name) {
+            updates.push('name = ?');
+            values.push(name);
+        }
+        // Update the name if provided
+        if (username) {
+            updates.push('username = ?');
+            values.push(username);
+        }
+
+        // Update the password if provided (and hash it)
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            updates.push('password = ?');
+            values.push(hashedPassword);
+        }
+
+        // If no valid updates provided
+        if (updates.length === 0) {
+            return res.status(400).json({ error: 'No updates provided' });
+        }
+
+        values.push(adminId);
+        const [result] = await pool.query(`UPDATE admin SET ${updates.join(', ')} WHERE id = ?`, values);
+
+        if (result.affectedRows > 0) {
+            res.json({ message: 'Profile updated successfully' });
+        } else {
+            res.status(404).json({ error: 'Admin not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+
+
+export default { createAdmin,login,getProfile,updateProfile };
