@@ -5,22 +5,6 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// function create a new admin user
-// const createAdmin = async (req, res) => {
-//     const { username, password, name } = req.body;
-//     try {
-//         // Hash the password
-//         const hashedPassword = await bcrypt.hash(password, 10);
-
-//         // Insert the new admin into the database with the hashed password
-//         const [result] = await pool.query('INSERT INTO admin (username, password, name) VALUES (?, ?, ?)', [username, hashedPassword, name]);
-
-//         res.json({ message: 'Admin created successfully', id: result.insertId });
-//     } catch (error) {
-//         console.error('Error creating admin:', error);
-//         res.status(500).json({ error: error.message });
-//     }
-// };
 
 const createAdmin = async (req, res) => {
     const {
@@ -31,7 +15,7 @@ const createAdmin = async (req, res) => {
     try {
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
-0
+        0
 
         // Insert the new admin into the database with the hashed password
         const [result] = await pool.query('INSERT INTO admin (username, password, name) VALUES (?, ?, ?)', [username, hashedPassword, name]);
@@ -111,24 +95,6 @@ const login = async (req, res) => {
 
 
 
-const logout = async (req, res) => {
-    const adminId = req.user.id; // Assuming `req.user.id` is set by `authenticateJWT` middleware
-
-    try {
-        // Clear the JWT token in the database
-        await pool.query('UPDATE admin_tokens SET token = NULL WHERE admin_id = ?', [adminId]);
-
-        res.json({
-            message: 'Logout successful'
-        });
-    } catch (error) {
-        console.error('Logout error:', error);
-        res.status(500).json({
-            error: error.message
-        });
-    }
-};
-
 
 const getProfile = async (req, res) => {
     try {
@@ -207,7 +173,22 @@ const updateProfile = async (req, res) => {
     }
 };
 
+const logout = async (req, res) => {
+    const adminId = req.user.id;
+    try {
+        // Remove the token from the database
+        await pool.query('DELETE FROM admin_tokens WHERE admin_id = ?', [adminId]);
 
+        res.json({
+            message: 'Logout successful'
+        });
+    } catch (error) {
+        console.error('Logout error:', error);
+        res.status(500).json({
+            error: error.message
+        });
+    }
+};
 
 
 export default {

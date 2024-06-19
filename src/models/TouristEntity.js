@@ -65,36 +65,6 @@ const getTouristEntitiesBySeason = async (seasonId) => {
   return rows;
 };
 
-const getTouristEntitiesOpenNow = async (dayOfWeek, currentTime) => {
-  const query = `
-      SELECT te.*
-      FROM tourist_entities te
-      JOIN operating_hours oh ON te.id = oh.place_id
-      WHERE oh.day_of_week = ? 
-        AND ? BETWEEN oh.opening_time AND oh.closing_time
-    `;
-  const [rows] = await pool.query(query, [dayOfWeek, currentTime]);
-  return rows;
-};
-
-const getAllTouristEntitiesWithDetails = async () => {
-  const query = `
-    SELECT te.*,
-           c.name AS category_name,
-           d.name AS district_name,
-           GROUP_CONCAT(DISTINCT s.name ORDER BY s.name ASC SEPARATOR ', ') AS seasons,
-           GROUP_CONCAT(DISTINCT ti.image_path ORDER BY ti.image_path ASC SEPARATOR ', ') AS images
-    FROM tourist_entities te
-    JOIN categories c ON te.category_id = c.id
-    JOIN district d ON te.district_id = d.id
-    LEFT JOIN seasons_relation sr ON te.id = sr.tourism_entities_id
-    LEFT JOIN seasons s ON sr.season_id = s.id
-    LEFT JOIN tourism_entities_images ti ON te.id = ti.tourism_entities_id
-    GROUP BY te.id, c.name, d.name
-  `;
-  const [rows] = await pool.query(query);
-  return rows;
-};
 
 
 export default {
@@ -103,6 +73,4 @@ export default {
   getTouristEntitiesByCategory,
   getTouristEntitiesByDistrict,
   getTouristEntitiesBySeason,
-  getTouristEntitiesOpenNow,
-  getAllTouristEntitiesWithDetails
 };

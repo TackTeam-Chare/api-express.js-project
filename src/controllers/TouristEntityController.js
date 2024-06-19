@@ -3,8 +3,7 @@ import TouristEntity from '../models/TouristEntity.js';
 const getAllTouristEntities = async (req, res) => {
     try {
         const entities = await TouristEntity.getAllTouristEntities();
-        res.json(entities);
-        if (entities) {
+        if (entities && entities.length > 0) {
             res.json(entities);
         } else {
             res.status(404).json({
@@ -18,6 +17,7 @@ const getAllTouristEntities = async (req, res) => {
         });
     }
 };
+
 
 const getTouristEntityById = async (req, res) => {
     try {
@@ -71,31 +71,6 @@ const getTouristEntitiesBySeason = async (req, res) => {
     }
 };
 
-const getTouristEntitiesOpenNow = async (req, res) => {
-    try {
-        const dayOfWeek = new Date().toLocaleString('en-US', { weekday: 'long' });
-        const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const entities = await OperatingHours.getTouristEntitiesOpenNow(dayOfWeek, currentTime);
-        res.json(entities);
-    } catch (error) {
-        console.error('Error fetching tourist entities open now:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-};
-
-const getAllTouristEntitiesWithDetails = async (req, res) => {
-    try {
-      const entities = await TouristEntity.getAllTouristEntitiesWithDetails();
-      if (entities.length === 0) {
-        return res.status(404).json({ error: "Tourist entity not found" });
-      }
-      res.json(entities);
-    } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ error: error.message });
-    }
-  };
-
 
 export default {
     getAllTouristEntities,
@@ -103,6 +78,4 @@ export default {
     getTouristEntitiesByCategory,
     getTouristEntitiesByDistrict,
     getTouristEntitiesBySeason,
-    getTouristEntitiesOpenNow,
-    getAllTouristEntitiesWithDetails
 };

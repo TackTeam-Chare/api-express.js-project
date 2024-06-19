@@ -11,6 +11,7 @@ router.post('/login', AuthController.login);
 //for admin Registration
 router.post('/register', AuthController.createAdmin);
 
+router.post('/logout', authenticateJWT,AuthController.logout);
 
 
 export default router;
