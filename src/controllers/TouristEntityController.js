@@ -4,17 +4,25 @@ const getAllTouristEntities = async (req, res) => {
     try {
         const entities = await TouristEntity.getAllTouristEntities();
         res.json(entities);
+        if (entities) {
+            res.json(entities);
+        } else {
+            res.status(404).json({
+                error: 'Tourist entity not found'
+            });
+        }
     } catch (error) {
+        console.error('Error fetching tourist entity:', error);
         res.status(500).json({
-            error: error.message
+            error: 'Internal server error'
         });
     }
 };
+
 const getTouristEntityById = async (req, res) => {
     try {
         const id = req.params.id;
         const touristEntity = await TouristEntity.getTouristEntityById(id);
-
 
         if (touristEntity) {
             res.json(touristEntity);
@@ -75,11 +83,26 @@ const getTouristEntitiesOpenNow = async (req, res) => {
     }
 };
 
+const getAllTouristEntitiesWithDetails = async (req, res) => {
+    try {
+      const entities = await TouristEntity.getAllTouristEntitiesWithDetails();
+      if (entities.length === 0) {
+        return res.status(404).json({ error: "Tourist entity not found" });
+      }
+      res.json(entities);
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  };
+
+
 export default {
     getAllTouristEntities,
     getTouristEntityById,
     getTouristEntitiesByCategory,
     getTouristEntitiesByDistrict,
     getTouristEntitiesBySeason,
-    getTouristEntitiesOpenNow
+    getTouristEntitiesOpenNow,
+    getAllTouristEntitiesWithDetails
 };

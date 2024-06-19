@@ -15,5 +15,5 @@ router.delete('/tourist-entities/:id', AdminController.deleteTouristEntity);
 // Protected routes
 router.get('/profile', AuthController.getProfile);
 router.put('/profile', AuthController.updateProfile);
-
+router.post('/logout',  AuthController.logout);
 export default router;

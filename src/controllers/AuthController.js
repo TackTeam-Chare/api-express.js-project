@@ -23,24 +23,39 @@ dotenv.config();
 // };
 
 const createAdmin = async (req, res) => {
-    const { username, password, name } = req.body;
+    const {
+        username,
+        password,
+        name
+    } = req.body;
     try {
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
+0
 
         // Insert the new admin into the database with the hashed password
         const [result] = await pool.query('INSERT INTO admin (username, password, name) VALUES (?, ?, ?)', [username, hashedPassword, name]);
 
         // Generate a token for the newly created admin
-        const token = jwt.sign({ id: result.insertId, username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({
+            id: result.insertId,
+            username
+        }, process.env.JWT_SECRET, {
+            expiresIn: '1h'
+        });
 
         // Store the token in the database
         await storeToken(result.insertId, token);
 
-        res.json({ message: 'Admin created successfully', id: result.insertId });
+        res.json({
+            message: 'Admin created successfully',
+            id: result.insertId
+        });
     } catch (error) {
         console.error('Error creating admin:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({
+            error: error.message
+        });
     }
 };
 
@@ -54,7 +69,10 @@ const storeToken = async (adminId, token) => {
 };
 
 const login = async (req, res) => {
-    const { username, password } = req.body;
+    const {
+        username,
+        password
+    } = req.body;
     try {
         // Fetch the user from the database
         const [rows] = await pool.query('SELECT * FROM admin WHERE username = ?', [username]);
@@ -63,20 +81,31 @@ const login = async (req, res) => {
         // Check if the user exists and the password matches
         if (admin && await bcrypt.compare(password, admin.password)) {
             // Generate a token if the username and password match
-            const token = jwt.sign({ id: admin.id, username: admin.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+            const token = jwt.sign({
+                id: admin.id,
+                username: admin.username
+            }, process.env.JWT_SECRET, {
+                expiresIn: '1h'
+            });
 
             // Store the token in the database
             await pool.query('UPDATE admin_tokens SET token = ? WHERE id = ?', [token, admin.id]);
-            
-            res.json({ token });
-        
+
+            res.json({
+                token
+            });
+
         } else {
-            res.status(401).json({ error: 'Invalid username or password' });
+            res.status(401).json({
+                error: 'Invalid username or password'
+            });
         }
     } catch (error) {
         // Handle any other errors
         console.error('Login error:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({
+            error: error.message
+        });
     }
 };
 
@@ -89,10 +118,14 @@ const logout = async (req, res) => {
         // Clear the JWT token in the database
         await pool.query('UPDATE admin_tokens SET token = NULL WHERE admin_id = ?', [adminId]);
 
-        res.json({ message: 'Logout successful' });
+        res.json({
+            message: 'Logout successful'
+        });
     } catch (error) {
         console.error('Logout error:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({
+            error: error.message
+        });
     }
 };
 
@@ -106,16 +139,24 @@ const getProfile = async (req, res) => {
         if (admin) {
             res.json(admin);
         } else {
-            res.status(404).json({ error: 'Admin not found' });
+            res.status(404).json({
+                error: 'Admin not found'
+            });
         }
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({
+            error: error.message
+        });
     }
 };
 
 // AuthController.js
 const updateProfile = async (req, res) => {
-    const { username,name, password } = req.body;
+    const {
+        username,
+        name,
+        password
+    } = req.body;
     const adminId = req.user.id;
 
     try {
@@ -142,23 +183,37 @@ const updateProfile = async (req, res) => {
 
         // If no valid updates provided
         if (updates.length === 0) {
-            return res.status(400).json({ error: 'No updates provided' });
+            return res.status(400).json({
+                error: 'No updates provided'
+            });
         }
 
         values.push(adminId);
         const [result] = await pool.query(`UPDATE admin SET ${updates.join(', ')} WHERE id = ?`, values);
 
         if (result.affectedRows > 0) {
-            res.json({ message: 'Profile updated successfully' });
+            res.json({
+                message: 'Profile updated successfully'
+            });
         } else {
-            res.status(404).json({ error: 'Admin not found' });
+            res.status(404).json({
+                error: 'Admin not found'
+            });
         }
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({
+            error: error.message
+        });
     }
 };
 
 
 
 
-export default { createAdmin,login,getProfile,updateProfile,logout  };
+export default {
+    createAdmin,
+    login,
+    getProfile,
+    updateProfile,
+    logout
+};
