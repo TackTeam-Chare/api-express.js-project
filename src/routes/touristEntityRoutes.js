@@ -12,4 +12,5 @@ router.get('/tourist-entities/season/:seasonId', TouristEntityController.getTour
 
 router.get('/tourist-entities/:id/nearby', TouristEntityController.getNearbyTouristEntities);
 
+
 export default router;

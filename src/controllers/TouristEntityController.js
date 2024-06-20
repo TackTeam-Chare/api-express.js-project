@@ -19,23 +19,41 @@ const getAllTouristEntities = async (req, res) => {
 };
 
 
+// const getTouristEntityById = async (req, res) => {
+//     try {
+//         const id = req.params.id;
+//         const touristEntity = await TouristEntity.getTouristEntityById(id);
+
+//         if (touristEntity) {
+//             res.json(touristEntity);
+//         } else {
+//             res.status(404).json({
+//                 error: 'Tourist entity not found'
+//             });
+//         }
+//     } catch (error) {
+//         console.error('Error fetching tourist entity:', error);
+//         res.status(500).json({
+//             error: 'Internal server error'
+//         });
+//     }
+// };
+
 const getTouristEntityById = async (req, res) => {
     try {
         const id = req.params.id;
-        const touristEntity = await TouristEntity.getTouristEntityById(id);
-
-        if (touristEntity) {
-            res.json(touristEntity);
-        } else {
-            res.status(404).json({
-                error: 'Tourist entity not found'
-            });
+        const entity = await TouristEntity.getTouristEntityDetailsById(id);
+        if (!entity) {
+            return res.status(404).json({ error: 'Tourist entity not found' });
         }
+
+        // Fetch nearby entities
+        const nearbyEntities = await TouristEntity.getNearForTouristEntities(entity.latitude, entity.longitude, 5000); // 5 km radius
+
+        res.json({ entity, nearbyEntities });
     } catch (error) {
-        console.error('Error fetching tourist entity:', error);
-        res.status(500).json({
-            error: 'Internal server error'
-        });
+        console.error('Error fetching tourist entity details:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
@@ -92,6 +110,7 @@ const getNearbyTouristEntities = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
 
 export default {
     getAllTouristEntities,
