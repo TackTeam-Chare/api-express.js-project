@@ -1,5 +1,6 @@
 import TouristEntity from '../models/TouristEntity.js';
 
+//  ดึงสถานที่ทั้งหมดในฐานข้อมูล
 const getAllTouristEntities = async (req, res) => {
     try {
         const entities = await TouristEntity.getAllTouristEntities();
@@ -18,44 +19,27 @@ const getAllTouristEntities = async (req, res) => {
     }
 };
 
-
-// const getTouristEntityById = async (req, res) => {
-//     try {
-//         const id = req.params.id;
-//         const touristEntity = await TouristEntity.getTouristEntityById(id);
-
-//         if (touristEntity) {
-//             res.json(touristEntity);
-//         } else {
-//             res.status(404).json({
-//                 error: 'Tourist entity not found'
-//             });
-//         }
-//     } catch (error) {
-//         console.error('Error fetching tourist entity:', error);
-//         res.status(500).json({
-//             error: 'Internal server error'
-//         });
-//     }
-// };
-
+// ดึงสถานที่ของเเต่ละไอดี
 const getTouristEntityById = async (req, res) => {
     try {
         const id = req.params.id;
-        const entity = await TouristEntity.getTouristEntityDetailsById(id);
-        if (!entity) {
-            return res.status(404).json({ error: 'Tourist entity not found' });
+        const touristEntity = await TouristEntity.getTouristEntityById(id);
+
+        if (touristEntity) {
+            res.json(touristEntity);
+        } else {
+            res.status(404).json({
+                error: 'Tourist entity not found'
+            });
         }
-
-        // Fetch nearby entities
-        const nearbyEntities = await TouristEntity.getNearForTouristEntities(entity.latitude, entity.longitude, 5000); // 5 km radius
-
-        res.json({ entity, nearbyEntities });
     } catch (error) {
-        console.error('Error fetching tourist entity details:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        console.error('Error fetching tourist entity:', error);
+        res.status(500).json({
+            error: 'Internal server error'
+        });
     }
 };
+
 
 const getTouristEntitiesByCategory = async (req, res) => {
     try {
@@ -89,28 +73,33 @@ const getTouristEntitiesBySeason = async (req, res) => {
     }
 };
 
+
+
+
+// สถานที่เลือกเเละสถานที่ใกล้เคียง
+
 const getNearbyTouristEntities = async (req, res) => {
-    const { id } = req.params;
-    const { radius = 10 } = req.query; // Radius in kilometers (default to 10 km)
-
     try {
-        // Fetch the main tourist entity
-        const mainEntity = await TouristEntity.getTouristEntityById(id);
+        const id = req.params.id;
+        let { radius = 5000 } = req.query;
+        radius = parseInt(radius, 10);
+        if (isNaN(radius) || radius <= 0) {
+            radius = 5000; // กำหนดค่าเริ่มต้น
+        }
 
-        if (!mainEntity) {
+        const entity = await TouristEntity.getTouristEntityDetailsById(id);
+        if (!entity) {
             return res.status(404).json({ error: 'Tourist entity not found' });
         }
 
-        // Fetch nearby tourist entities
-        const nearbyEntities = await TouristEntity.getNearbyTouristEntities(mainEntity.latitude, mainEntity.longitude, radius);
+        const nearbyEntities = await TouristEntity.getNearbyTouristEntities(entity.latitude, entity.longitude, radius);
 
-        res.json(nearbyEntities);
+        res.json({ entity, nearbyEntities });
     } catch (error) {
-        console.error('Error fetching nearby tourist entities:', error);
+        console.error('Error fetching tourist entity details:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
-
 
 export default {
     getAllTouristEntities,

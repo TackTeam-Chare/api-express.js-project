@@ -26,26 +26,6 @@ const getTouristEntityById = async (id) => {
   return rows[0];
 };
 
-const getTouristEntityDetailsById = async (id) => {
-  const query = `
-      SELECT te.*, 
-             c.name AS category_name, 
-             d.name AS district_name, 
-             GROUP_CONCAT(CONCAT(oh.day_of_week, ' ', oh.opening_time, '-', oh.closing_time)) AS opening_hours,
-             GROUP_CONCAT(CONCAT(s.name, ' (', s.date_start, ' - ', s.date_end, ')')) AS seasons
-      FROM tourist_entities te
-      JOIN categories c ON te.category_id = c.id
-      JOIN district d ON te.district_id = d.id
-      LEFT JOIN operating_hours oh ON te.id = oh.place_id
-      LEFT JOIN seasons_relation sr ON te.id = sr.tourism_entities_id
-      LEFT JOIN seasons s ON sr.season_id = s.id
-      WHERE te.id = ?
-      GROUP BY te.id;
-  `;
-  const [rows] = await pool.query(query, [id]);
-  return rows[0];
-};
-
 
 const getTouristEntitiesByCategory = async (categoryId) => {
   const query = `
@@ -85,19 +65,9 @@ const getTouristEntitiesBySeason = async (seasonId) => {
   return rows;
 };
 
-const getNearbyTouristEntities = async (latitude, longitude, radius) => {
-  const query = `
-      SELECT te.*,
-             (6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance
-      FROM tourist_entities te
-      HAVING distance < ?
-      ORDER BY distance
-  `;
-  const [rows] = await pool.query(query, [latitude, longitude, latitude, radius]);
-  return rows;
-};
 
-const getNearForTouristEntities = async (latitude, longitude, distance) => {
+
+const getNearbyTouristEntities = async (latitude, longitude, distance) => {
   const query = `
       SELECT te.*, 
              c.name AS category_name, 
@@ -120,6 +90,28 @@ const getNearForTouristEntities = async (latitude, longitude, distance) => {
 };
 
 
+const getTouristEntityDetailsById = async (id) => {
+  const query = `
+      SELECT te.*, 
+             c.name AS category_name, 
+             d.name AS district_name, 
+             GROUP_CONCAT(CONCAT(oh.day_of_week, ' ', oh.opening_time, '-', oh.closing_time)) AS opening_hours,
+             GROUP_CONCAT(CONCAT(s.name, ' (', s.date_start, ' - ', s.date_end, ')')) AS seasons
+      FROM tourist_entities te
+      JOIN categories c ON te.category_id = c.id
+      JOIN district d ON te.district_id = d.id
+      LEFT JOIN operating_hours oh ON te.id = oh.place_id
+      LEFT JOIN seasons_relation sr ON te.id = sr.tourism_entities_id
+      LEFT JOIN seasons s ON sr.season_id = s.id
+      WHERE te.id = ?
+      GROUP BY te.id;
+  `;
+  const [rows] = await pool.query(query, [id]);
+  return rows[0];
+};
+
+
+
 export default {
   getAllTouristEntities,
   getTouristEntityById,
@@ -128,5 +120,4 @@ export default {
   getTouristEntitiesBySeason,
   getNearbyTouristEntities,
   getTouristEntityDetailsById,
-  getNearForTouristEntities
 };
