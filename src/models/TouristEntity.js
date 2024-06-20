@@ -65,6 +65,17 @@ const getTouristEntitiesBySeason = async (seasonId) => {
   return rows;
 };
 
+const getNearbyTouristEntities = async (latitude, longitude, radius) => {
+  const query = `
+      SELECT te.*, 
+             (6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance
+      FROM tourist_entities te
+      HAVING distance < ?
+      ORDER BY distance
+  `;
+  const [rows] = await pool.query(query, [latitude, longitude, latitude, radius]);
+  return rows;
+};
 
 
 export default {
@@ -73,4 +84,5 @@ export default {
   getTouristEntitiesByCategory,
   getTouristEntitiesByDistrict,
   getTouristEntitiesBySeason,
+  getNearbyTouristEntities
 };

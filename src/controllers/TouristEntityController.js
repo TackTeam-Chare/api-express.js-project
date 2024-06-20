@@ -71,6 +71,27 @@ const getTouristEntitiesBySeason = async (req, res) => {
     }
 };
 
+const getNearbyTouristEntities = async (req, res) => {
+    const { id } = req.params;
+    const { radius = 10 } = req.query; // Radius in kilometers (default to 10 km)
+
+    try {
+        // Fetch the main tourist entity
+        const mainEntity = await TouristEntity.getTouristEntityById(id);
+
+        if (!mainEntity) {
+            return res.status(404).json({ error: 'Tourist entity not found' });
+        }
+
+        // Fetch nearby tourist entities
+        const nearbyEntities = await TouristEntity.getNearbyTouristEntities(mainEntity.latitude, mainEntity.longitude, radius);
+
+        res.json(nearbyEntities);
+    } catch (error) {
+        console.error('Error fetching nearby tourist entities:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
 
 export default {
     getAllTouristEntities,
@@ -78,4 +99,5 @@ export default {
     getTouristEntitiesByCategory,
     getTouristEntitiesByDistrict,
     getTouristEntitiesBySeason,
+    getNearbyTouristEntities
 };
