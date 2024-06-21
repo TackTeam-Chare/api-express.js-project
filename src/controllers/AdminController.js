@@ -31,6 +31,7 @@ const getTouristEntityById = async (req, res) => {
     }
 };
 
+
 // Create a new tourist entity
 const createTouristEntity = async (req, res) => {
     const touristEntity = req.body;
@@ -90,10 +91,34 @@ const deleteTouristEntity = async (req, res) => {
     }
 };
 
+const getNearbyTouristEntitiesHandler = async (req, res) => {
+    try {
+      const id = req.params.id;
+      let { radius = 5000 } = req.query;
+      radius = parseInt(radius, 10);
+      if (isNaN(radius) || radius <= 0) {
+        radius = 5000;
+      }
+  
+      const entity = await Admin.getTouristEntityDetailsById(id);
+      if (!entity) {
+        return res.status(404).json({ error: 'Tourist entity not found' });
+      }
+  
+      const nearbyEntities = await Admin.getNearbyTouristEntities(entity.latitude, entity.longitude, radius);
+  
+      res.json({ entity, nearbyEntities });
+    } catch (error) {
+      console.error('Error fetching tourist entity details:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+
 export default {
     getAllTouristEntities,
     getTouristEntityById,
     createTouristEntity,
     updateTouristEntity,
     deleteTouristEntity,
+    getNearbyTouristEntitiesHandler
 };

@@ -1,6 +1,5 @@
 import express from 'express';
 import AdminController from '../controllers/AdminController.js';
-import authenticateJWT from '../middleware/authMiddleware.js';
 import AuthController from '../controllers/AuthController.js';
 const router = express.Router();
 
@@ -8,6 +7,7 @@ const router = express.Router();
 
 router.get('/tourist-entities', AdminController.getAllTouristEntities);
 router.get('/tourist-entities/:id', AdminController.getTouristEntityById);
+router.get('/tourist-entities/:id/nearby', AdminController.getNearbyTouristEntitiesHandler);
 router.post('/tourist-entities', AdminController.createTouristEntity);
 router.put('/tourist-entities/:id', AdminController.updateTouristEntity);
 router.delete('/tourist-entities/:id', AdminController.deleteTouristEntity);
