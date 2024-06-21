@@ -5,7 +5,6 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-
 const createAdmin = async (req, res) => {
     const { username, password, name } = req.body;
     try {
@@ -13,6 +12,7 @@ const createAdmin = async (req, res) => {
         const [result] = await pool.query('INSERT INTO admin (username, password, name) VALUES (?, ?, ?)', [username, hashedPassword, name]);
         const token = jwt.sign({ id: result.insertId, username }, process.env.JWT_SECRET, { expiresIn: '1h' });
         await storeToken(result.insertId, token);
+        console.log(`Admin created successfully with id ${result.insertId}`);
         res.json({ message: 'Admin created successfully', id: result.insertId, token });
     } catch (error) {
         console.error('Error creating admin:', error);
@@ -23,15 +23,15 @@ const createAdmin = async (req, res) => {
 const storeToken = async (adminId, token) => {
     try {
         await pool.query(
-            'INSERT INTO admin_tokens (admin_id, token) VALUES (?, ?) ON DUPLICATE KEY UPDATE token = ?',
+            'INSERT INTO admin_tokens (admin_id, token) VALUES (?, ?) ON DUPLICATE KEY UPDATE token = ?, created_at = current_timestamp()',
             [adminId, token, token]
         );
+        console.log(`Token stored successfully for admin id ${adminId}`);
     } catch (error) {
         console.error('Error storing token:', error);
         throw error;
     }
 };
-
 
 const login = async (req, res) => {
     const { username, password } = req.body;
@@ -41,12 +41,29 @@ const login = async (req, res) => {
         if (admin && await bcrypt.compare(password, admin.password)) {
             const token = jwt.sign({ id: admin.id, username: admin.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
             await storeToken(admin.id, token);
+            console.log(`Login successful for admin id ${admin.id}`);
             res.json({ token });
         } else {
             res.status(401).json({ error: 'Invalid username or password' });
         }
     } catch (error) {
         console.error('Login error:', error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const logout = async (req, res) => {
+    const adminId = req.user.id;
+    try {
+        const token = req.header('Authorization')?.split(' ')[1];
+        if (!token) {
+            return res.status(403).json({ message: 'Access denied, no token provided.' });
+        }
+        await pool.query('DELETE FROM admin_tokens WHERE admin_id = ? AND token = ?', [adminId, token]);
+        console.log(`Logout successful for admin id ${adminId}`);
+        res.json({ message: 'Logout successful' });
+    } catch (error) {
+        console.error('Logout error:', error);
         res.status(500).json({ error: error.message });
     }
 };
@@ -132,20 +149,7 @@ const updateProfile = async (req, res) => {
     }
 };
 
-const logout = async (req, res) => {
-    const adminId = req.user.id;
-    try {
-        const token = req.header('Authorization')?.split(' ')[1];
-        if (!token) {
-            return res.status(403).json({ message: 'Access denied, no token provided.' });
-        }
-        await pool.query('DELETE FROM admin_tokens WHERE admin_id = ? AND token = ?', [adminId, token]);
-        res.json({ message: 'Logout successful' });
-    } catch (error) {
-        console.error('Logout error:', error);
-        res.status(500).json({ error: error.message });
-    }
-};
+
 
 
 
