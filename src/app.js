@@ -23,7 +23,6 @@ app.use('/', touristEntityRoutes);
 app.use('/auth', authRoutes);
 app.use('/admin', authenticateJWT, adminRoutes);
 
-
 pool.getConnection()
   .then(conn => {
     console.log('Database connection established');
