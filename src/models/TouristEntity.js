@@ -110,18 +110,38 @@ const getTouristEntitiesByDistrict = async (districtId) => {
 };
 
 
-
 const getTouristEntitiesBySeason = async (seasonId) => {
   const query = `
-      SELECT te.*, s.name AS season_name
-      FROM tourist_entities te
-      JOIN seasons_relation sr ON te.id = sr.tourism_entities_id
-      JOIN seasons s ON sr.season_id = s.id
-      WHERE sr.season_id = ?
-    `;
+    SELECT 
+        te.*, 
+        s.name AS season_name, 
+        ti.image_path,
+        d.name AS district_name,
+        CONCAT(
+            GROUP_CONCAT(
+                DISTINCT CONCAT(
+                    oh.day_of_week, ': ', 
+                    TIME_FORMAT(oh.opening_time, '%h:%i %p'), ' - ', 
+                    TIME_FORMAT(oh.closing_time, '%h:%i %p')
+                ) ORDER BY oh.day_of_week SEPARATOR '\n'
+            )
+        ) AS operating_hours
+    FROM 
+        tourist_entities te
+        JOIN seasons_relation sr ON te.id = sr.tourism_entities_id
+        JOIN seasons s ON sr.season_id = s.id
+        LEFT JOIN tourism_entities_images ti ON te.id = ti.tourism_entities_id
+        LEFT JOIN operating_hours oh ON te.id = oh.place_id
+        JOIN district d ON te.district_id = d.id
+    WHERE 
+        sr.season_id = ?
+    GROUP BY 
+        te.id
+  `;
   const [rows] = await pool.query(query, [seasonId]);
   return rows;
 };
+
 
 
 
@@ -176,7 +196,67 @@ const getTouristEntityDetailsById = async (id) => {
 
 
 
+const getOperatingHoursById = async (id) => {
+  const query = `
+      SELECT *
+      FROM operating_hours
+      WHERE place_id = ?
+  `;
+  const [rows] = await pool.query(query, [id]);
+  // console.log('Generated SQL query:', rows); 
+  return rows;
 
+};
+
+// ฟังก์ชันสำหรับดึงข้อมูล Tourist Entities ตามช่วงเวลาทำการ
+const getTouristEntitiesByTime = async (day_of_week, opening_time, closing_time) => {
+  let query = `
+      SELECT 
+          te.*,
+          d.name AS district_name,
+          GROUP_CONCAT(
+              DISTINCT CONCAT(
+                  oh.day_of_week, ': ', 
+                  TIME_FORMAT(oh.opening_time, '%h:%i %p'), ' - ', 
+                  TIME_FORMAT(oh.closing_time, '%h:%i %p')
+              ) ORDER BY oh.day_of_week SEPARATOR '\n'
+          ) AS operating_hours
+      FROM
+          tourist_entities te
+          JOIN district d ON te.district_id = d.id
+          LEFT JOIN operating_hours oh ON te.id = oh.place_id
+      WHERE
+          1 = 1
+  `;
+
+  // เพิ่มเงื่อนไขการค้นหาเวลาทำการ
+  const params = [];
+  if (day_of_week && opening_time && closing_time) {
+    query += `
+        AND oh.day_of_week = ?
+        AND oh.opening_time <= ?
+        AND oh.closing_time >= ?
+    `;
+    params.push(day_of_week, opening_time, closing_time);
+  }
+
+  query += `
+      GROUP BY 
+          te.id
+  `;
+
+  // Log the generated SQL query and parameters
+  console.log('Generated SQL query:', query);
+  console.log('Parameters:', params);
+
+  // ส่ง query ไปยังฐานข้อมูล MySQL พร้อมกับพารามิเตอร์ที่ระบุ
+  const [rows] = await pool.query(query, params);
+
+  // Log the fetched rows
+  console.log('Fetched rows from database:', rows);
+
+  return rows;
+};
 
 export default {
   getAllTouristEntities,
@@ -186,4 +266,6 @@ export default {
   getTouristEntitiesBySeason,
   getNearbyTouristEntities,
   getTouristEntityDetailsById,
+  getOperatingHoursById,
+  getTouristEntitiesByTime
 };

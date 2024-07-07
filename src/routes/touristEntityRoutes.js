@@ -12,6 +12,10 @@ router.get('/tourist-entities/category/:categoryId', TouristEntityController.get
 router.get('/tourist-entities/district/:districtId', TouristEntityController.getTouristEntitiesByDistrict);
 router.get('/tourist-entities/season/:seasonId', TouristEntityController.getTouristEntitiesBySeason);
 
+router.get('/tourist-entities/operating-hours/:id', TouristEntityController.getOperatingHoursById);
+
+router.get('/tourist-entities/operating-hours/:day/:opening/:closing', TouristEntityController.getTouristEntitiesByTime);
+
 
 
 
