@@ -14,9 +14,9 @@ router.get('/tourist-entities/season/:seasonId', TouristEntityController.getTour
 
 router.get('/tourist-entities/operating-hours/:id', TouristEntityController.getOperatingHoursById);
 
-router.get('/tourist-entities/operating-hours/:day/:opening/:closing', TouristEntityController.getTouristEntitiesByTime);
+router.get('/tourist-entities/operating-hours/:day_of_week/:opening_time/:closing_time', TouristEntityController.getTouristEntitiesByTime);
 
-
+// router.get('/tourist-entities/operating-hours', TouristEntityController.getTouristEntitiesByTime);
 
 
 export default router;
