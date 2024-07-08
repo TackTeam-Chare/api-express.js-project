@@ -72,9 +72,6 @@ const getTouristEntitiesByCategory = async (categoryId) => {
   return rows;
 };
 
-
-
-
 // const getNearbyTouristEntities = async (latitude, longitude, distance) => {
 //   const query = `
 //       SELECT te.*, 
@@ -133,7 +130,6 @@ const getNearbyTouristEntities = async (latitude, longitude, distance, excludeId
   const [rows] = await pool.query(query, [longitude, latitude, excludeId, longitude, latitude, distance]);
   return rows;
 };
-
 
 const getTouristEntityDetailsById = async (id) => {
   const query = `

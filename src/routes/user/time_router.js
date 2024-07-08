@@ -1,5 +1,5 @@
 import express from 'express';
-import OperatingHoursEntityController from '../controllers/OperatingHoursEntityController.js';
+import OperatingHoursEntityController from '../../controllers/user/OperatingHoursEntityController.js';
 
 const router = express.Router();
 

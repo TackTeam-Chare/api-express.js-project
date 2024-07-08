@@ -1,5 +1,5 @@
 import express from 'express';
-import SeasonEntityController from '../controllers/SeasonEntityController.js';
+import SeasonEntityController from '../../controllers/user/SeasonEntityController.js';
 
 const router = express.Router();
 

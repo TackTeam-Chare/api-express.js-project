@@ -1,4 +1,4 @@
-import SeasonModel from '../models/Season.js';
+import SeasonModel from '../../models/user/Season.js';
 
 const getAllSeasons = async (req, res) => {
     try {

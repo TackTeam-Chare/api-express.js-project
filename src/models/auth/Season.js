@@ -7,8 +7,31 @@ const getAllSeasons = async () => {
     return rows;
 };
 
+const getSeasonById = async (id) => {
+    const query = 'SELECT * FROM seasons WHERE id = ?';
+    const [rows] = await pool.query(query, [id]);
+    return rows[0];
+};
+
+const create = async (season) => {
+    const query = 'INSERT INTO seasons SET ?';
+    const [result] = await pool.query(query, season);
+    return result.insertId;
+};
+
+const update = async (id, season) => {
+    const query = 'UPDATE seasons SET ? WHERE id = ?';
+    const [result] = await pool.query(query, [season, id]);
+    return result.affectedRows;
+};
+
+const remove = async (id) => {
+    const query = 'DELETE FROM seasons WHERE id = ?';
+    const [result] = await pool.query(query, [id]);
+    return result.affectedRows;
+};
 const getTouristEntitiesBySeason = async (seasonId) => {
-  const query = `
+    const query = `
     SELECT
         te.*,
         s.name AS season_name, 
@@ -35,19 +58,15 @@ const getTouristEntitiesBySeason = async (seasonId) => {
     GROUP BY 
         te.id
   `;
-  const [rows] = await pool.query(query, [seasonId]);
-  return rows;
+    const [rows] = await pool.query(query, [seasonId]);
+    return rows;
 };
-
-
-
-
-
-
-
-
 
 export default {
     getAllSeasons,
+    getSeasonById,
+    create,
+    update,
+    remove,
     getTouristEntitiesBySeason,
 };

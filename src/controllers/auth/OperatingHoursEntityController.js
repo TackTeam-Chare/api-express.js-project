@@ -12,6 +12,50 @@ const getAllOperatingHours = async (req, res) => {
     }
 };
 
+// Create a new operating hours
+const createOperatingHours = async (req, res) => {
+    const operatingHour = req.body;
+    try {
+        const insertId = await TimeModel.create(operatingHour);
+        res.json({
+            message: 'Operating hours created successfully',
+            id: insertId
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Update an operating hours
+const updateOperatingHours = async (req, res) => {
+    const id = req.params.id;
+    const operatingHour = req.body;
+    try {
+        const affectedRows = await TimeModel.update(id, operatingHour);
+        if (affectedRows > 0) {
+            res.json({ message: `Operating hours with ID ${id} updated successfully` });
+        } else {
+            res.status(404).json({ error: 'Operating hours not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Delete an operating hours
+const deleteOperatingHours = async (req, res) => {
+    const id = req.params.id;
+    try {
+        const affectedRows = await TimeModel.remove(id);
+        if (affectedRows > 0) {
+            res.json({ message: `Operating hours with ID ${id} deleted successfully` });
+        } else {
+            res.status(404).json({ error: 'Operating hours not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 const getOperatingHoursById = async (req, res) => {
     try {
         const id = req.params.id;
@@ -51,6 +95,9 @@ const getTouristEntitiesByTime = async (req, res) => {
 
 export default {
     getAllOperatingHours,
+    createOperatingHours,
+    updateOperatingHours,
+    deleteOperatingHours,
     getOperatingHoursById,
     getTouristEntitiesByTime
 };

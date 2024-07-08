@@ -2,6 +2,7 @@ import pool from '../../config/db.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import AdminModel from '../../models/auth/Admin.js';
 
 dotenv.config();
 
@@ -49,10 +50,6 @@ const login = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
-
-
-
 
 const getProfile = async (req, res) => {
     try {
@@ -146,10 +143,69 @@ const logout = async (req, res) => {
     }
 };
 
+// Get all admins
+const getAllAdmins = async (req, res) => {
+    try {
+        const admins = await AdminModel.getAllAdmins();
+        res.json(admins);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+// Get admin by ID
+const getAdminById = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const admin = await AdminModel.getAdminById(id);
+        if (admin) {
+            res.json(admin);
+        } else {
+            res.status(404).json({ error: 'Admin not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+// Update an admin
+const updateAdmin = async (req, res) => {
+    const id = req.params.id;
+    const admin = req.body;
+    try {
+        const affectedRows = await AdminModel.update(id, admin);
+        if (affectedRows > 0) {
+            res.json({ message: `Admin with ID ${id} updated successfully` });
+        } else {
+            res.status(404).json({ error: 'Admin not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Delete an admin
+const deleteAdmin = async (req, res) => {
+    const id = req.params.id;
+    try {
+        const affectedRows = await AdminModel.remove(id);
+        if (affectedRows > 0) {
+            res.json({ message: `Admin with ID ${id} deleted successfully` });
+        } else {
+            res.status(404).json({ error: 'Admin not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 
 export default {
+    getAllAdmins,
+    getAdminById,
     createAdmin,
+    updateAdmin,
+    deleteAdmin,
     storeToken,
     login,
     getProfile,

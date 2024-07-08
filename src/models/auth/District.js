@@ -8,6 +8,30 @@ const getAllDistricts = async () => {
     return rows;
 };
 
+  const getDistrictById = async (id) => {
+    const query = 'SELECT * FROM district WHERE id = ?';
+    const [rows] = await pool.query(query, [id]);
+    return rows[0];
+  };
+  
+  const create = async (district) => {
+    const query = 'INSERT INTO district SET ?';
+    const [result] = await pool.query(query, district);
+    return result.insertId;
+  };
+  
+  const update = async (id, district) => {
+    const query = 'UPDATE district SET ? WHERE id = ?';
+    const [result] = await pool.query(query, [district, id]);
+    return result.affectedRows;
+  };
+  
+  const remove = async (id) => {
+    const query = 'DELETE FROM district WHERE id = ?';
+    const [result] = await pool.query(query, [id]);
+    return result.affectedRows;
+  };
+
 const getTouristEntitiesByDistrict = async (districtId) => {
   const query = `
   SELECT
@@ -44,5 +68,9 @@ const getTouristEntitiesByDistrict = async (districtId) => {
 
 export default {
   getAllDistricts,
+  getDistrictById,
+  create,
+  update,
+  remove,
   getTouristEntitiesByDistrict
 };

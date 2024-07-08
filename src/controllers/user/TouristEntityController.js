@@ -1,4 +1,4 @@
-import TouristModel from '../models/TouristEntity.js';
+import TouristModel from '../../models/user/TouristEntity.js';
 
 //  ดึงสถานที่ทั้งหมดในฐานข้อมูล
 const getAllTouristEntities = async (req, res) => {

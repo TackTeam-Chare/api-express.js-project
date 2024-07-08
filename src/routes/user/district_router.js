@@ -1,5 +1,5 @@
 import express from 'express';
-import DistrictEntityController from '../controllers/DistrictEntityController.js';
+import DistrictEntityController from '../../controllers/user/DistrictEntityController.js';
 
 const router = express.Router();
 

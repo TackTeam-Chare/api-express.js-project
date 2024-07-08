@@ -1,9 +1,33 @@
 import pool from '../../config/db.js';
 
 const getAllCategories = async () => {
-  const query = `SELECT * FROM categories`;
+  const query = `SELECT * FROM categories`;Q
   const [rows] = await pool.query(query);
   return rows;
+};
+
+const getCategoryById = async (id) => {
+  const query = 'SELECT * FROM categories WHERE id = ?';
+  const [rows] = await pool.query(query, [id]);
+  return rows[0];
+};
+
+const create = async (category) => {
+  const query = 'INSERT INTO categories SET ?';
+  const [result] = await pool.query(query, category);
+  return result.insertId;
+};
+
+const update = async (id, category) => {
+  const query = 'UPDATE categories SET ? WHERE id = ?';
+  const [result] = await pool.query(query, [category, id]);
+  return result.affectedRows;
+};
+
+const remove = async (id) => {
+  const query = 'DELETE FROM categories WHERE id = ?';
+  const [result] = await pool.query(query, [id]);
+  return result.affectedRows;
 };
 
 const getTouristEntitiesByCategory = async (categoryId) => {
@@ -53,5 +77,9 @@ const getTouristEntitiesByCategory = async (categoryId) => {
 
 export default {
   getAllCategories,
+  getCategoryById,
+  create,
+  update,
+  remove,
   getTouristEntitiesByCategory,
 };

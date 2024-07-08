@@ -1,4 +1,4 @@
-import TimeModel from '../models/Time.js';
+import TimeModel from '../../models/user/Time.js';
 
 const getAllOperatingHours = async (req, res) => {
     try {

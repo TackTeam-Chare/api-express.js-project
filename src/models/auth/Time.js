@@ -7,17 +7,40 @@ const getAllOperatingHours = async () => {
   return rows;
 };
 
-
 const getOperatingHoursById = async (id) => {
-    const query = `
-        SELECT *
-        FROM operating_hours
-        WHERE place_id = ?
-    `;
-    const [rows] = await pool.query(query, [id]);
-    // console.log('Generated SQL query:', rows); 
-    return rows;
-  };
+  const query = 'SELECT * FROM operating_hours WHERE id = ?';
+  const [rows] = await pool.query(query, [id]);
+  return rows[0];
+};
+
+const create = async (operatingHour) => {
+  const query = 'INSERT INTO operating_hours SET ?';
+  const [result] = await pool.query(query, operatingHour);
+  return result.insertId;
+};
+
+const update = async (id, operatingHour) => {
+  const query = 'UPDATE operating_hours SET ? WHERE id = ?';
+  const [result] = await pool.query(query, [operatingHour, id]);
+  return result.affectedRows;
+};
+
+const remove = async (id) => {
+  const query = 'DELETE FROM operating_hours WHERE id = ?';
+  const [result] = await pool.query(query, [id]);
+  return result.affectedRows;
+};
+
+// const getOperatingHoursById = async (id) => {
+//     const query = `
+//         SELECT *
+//         FROM operating_hours
+//         WHERE place_id = ?
+//     `;
+//     const [rows] = await pool.query(query, [id]);
+//     // console.log('Generated SQL query:', rows); 
+//     return rows;
+//   };
 
   const getTouristEntitiesByTime = async (day_of_week, opening_time, closing_time) => {
     let query = `
@@ -68,5 +91,8 @@ const getOperatingHoursById = async (id) => {
 export default {
   getAllOperatingHours,
   getOperatingHoursById,
+  create,
+  update,
+  remove,
   getTouristEntitiesByTime
 };

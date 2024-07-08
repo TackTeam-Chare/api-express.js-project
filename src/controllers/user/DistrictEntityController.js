@@ -1,4 +1,4 @@
-import DistrictModel from '../models/District.js';
+import DistrictModel from '../../models/user/District.js';
 
 const getAllDistricts = async (req, res) => {
     try {

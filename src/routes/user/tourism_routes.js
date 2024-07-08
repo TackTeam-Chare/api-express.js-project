@@ -1,5 +1,5 @@
 import express from 'express';
-import TouristEntityController from '../controllers/TouristEntityController.js';
+import TouristEntityController from '../../controllers/user/TouristEntityController.js';
 
 const router = express.Router();
 
