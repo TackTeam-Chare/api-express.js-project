@@ -1,24 +1,18 @@
 import CategoryModel from '../../models/auth/Category.js';
 
 
+
 const getAllCategories = async (req, res) => {
     try {
         const categories = await CategoryModel.getAllCategories();
-        if (categories && categories.length > 0) {
-            res.json(categories);
-        } else {
-            res.status(404).json({
-                error: 'Tourist entity not found'
-            });
-        }
+        res.json(categories);
     } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error('Error fetching districts:', error);
         res.status(500).json({
             error: 'Internal server error'
         });
     }
 };
-
 
 
 const getCategoryById = async (req, res) => {

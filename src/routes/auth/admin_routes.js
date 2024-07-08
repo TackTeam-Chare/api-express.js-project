@@ -60,8 +60,8 @@ router.delete('/districts/:id', DistrictEntityController.deleteDistrict); // ล
 
 // Categories
 router.get('/categories', CategoryEntityController.getAllCategories); // ดึงข้อมูลหมวดหมู่ทั้งหมด
-router.get('/tourist-entities/categories/:id', CategoryEntityController.getTouristEntitiesByCategory); // ดึงข้อมูลสถานที่ท่องเที่ยวตามหมวดหมู่
 router.get('/categories/:id', CategoryEntityController.getCategoryById); // ดึงข้อมูลสถานที่ท่องเที่ยวตามหมวดหมู่
+router.get('/tourist-entities/categories/:id', CategoryEntityController.getTouristEntitiesByCategory); // ดึงข้อมูลสถานที่ท่องเที่ยวตามหมวดหมู่
 router.post('/categories', CategoryEntityController.createCategory); // เพิ่มหมวดหมู่ใหม่
 router.put('/categories/:id', CategoryEntityController.updateCategory); // อัปเดตหมวดหมู่ตามไอดี
 router.delete('/categories/:id', CategoryEntityController.deleteCategory); // ลบหมวดหมู่ตามไอดี
