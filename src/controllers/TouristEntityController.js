@@ -1,9 +1,9 @@
-import TouristEntity from '../models/TouristEntity.js';
+import TouristModel from '../models/TouristEntity.js';
 
 //  ดึงสถานที่ทั้งหมดในฐานข้อมูล
 const getAllTouristEntities = async (req, res) => {
     try {
-        const entities = await TouristEntity.getAllTouristEntities();
+        const entities = await TouristModel.getAllTouristEntities();
         if (entities && entities.length > 0) {
             res.json(entities);
         } else {
@@ -23,7 +23,7 @@ const getAllTouristEntities = async (req, res) => {
 const getTouristEntityById = async (req, res) => {
     try {
         const id = req.params.id;
-        const touristEntity = await TouristEntity.getTouristEntityById(id);
+        const touristEntity = await TouristModel.getTouristEntityById(id);
 
         if (touristEntity) {
             res.json(touristEntity);
@@ -39,10 +39,6 @@ const getTouristEntityById = async (req, res) => {
         });
     }
 };
-
-
-
-
 
 
 // สถานที่เลือกเเละสถานที่ใกล้เคียง
@@ -88,13 +84,13 @@ const getNearbyTouristEntitiesHandler = async (req, res) => {
             radius = 1500;
         }
 
-        const entity = await TouristEntity.getTouristEntityDetailsById(id);
+        const entity = await TouristModel.getTouristEntityDetailsById(id);
         if (!entity) {
             return res.status(404).json({ error: 'Tourist entity not found' });
         }
 
         // ดึงข้อมูลสถานที่ท่องเที่ยวใกล้เคียง โดยไม่รวมตัวเอง
-        const nearbyEntities = await TouristEntity.getNearbyTouristEntities(entity.latitude, entity.longitude, radius, id);
+        const nearbyEntities = await TouristModel.getNearbyTouristEntities(entity.latitude, entity.longitude, radius, id);
 
         res.json({ entity, nearbyEntities });
     } catch (error) {
