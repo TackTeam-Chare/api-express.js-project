@@ -20,18 +20,24 @@ const getAllCategories = async (req, res) => {
 };
 
 
-// Get category by ID
+
 const getCategoryById = async (req, res) => {
     try {
         const id = req.params.id;
         const category = await CategoryModel.getCategoryById(id);
+
         if (category) {
             res.json(category);
         } else {
-            res.status(404).json({ error: 'Category not found' });
+            res.status(404).json({
+                error: 'category not found for the category entity'
+            });
         }
     } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
+        console.error('Error fetching category:', error);
+        res.status(500).json({
+            error: 'Internal server error'
+        });
     }
 };
 
@@ -82,8 +88,8 @@ const deleteCategory = async (req, res) => {
 
 const getTouristEntitiesByCategory = async (req, res) => {
     try {
-        const categoryId = req.params.categoryId;
-        const entities = await CategoryModel.getTouristEntitiesByCategory(categoryId);
+        const id = req.params.id;
+        const entities = await CategoryModel.getTouristEntitiesByCategory(id);
         res.json(entities);
     } catch (error) {
         console.error('Error fetching tourist entities by category:', error);

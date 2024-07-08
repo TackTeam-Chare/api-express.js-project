@@ -75,8 +75,8 @@ const deleteDistrict = async (req, res) => {
 
 const getTouristEntitiesByDistrict = async (req, res) => {
     try {
-        const districtId = req.params.districtId;
-        const entities = await DistrictModel.getTouristEntitiesByDistrict(districtId);
+        const id = req.params.id;
+        const entities = await DistrictModel.getTouristEntitiesByDistrict(id);
         res.json(entities);
     } catch (error) {
         console.error('Error fetching tourist entities by district:', error);

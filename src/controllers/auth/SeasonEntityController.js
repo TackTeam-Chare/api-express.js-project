@@ -75,8 +75,8 @@ const deleteSeason = async (req, res) => {
 
 const getTouristEntitiesBySeason = async (req, res) => {
     try {
-        const seasonId = req.params.seasonId;
-        const entities = await SeasonModel.getTouristEntitiesBySeason(seasonId);
+        const id = req.params.id;
+        const entities = await SeasonModel.getTouristEntitiesBySeason(id);
         res.json(entities);
     } catch (error) {
         console.error('Error fetching tourist entities by season:', error);

@@ -56,6 +56,7 @@ const deleteOperatingHours = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 const getOperatingHoursById = async (req, res) => {
     try {
         const id = req.params.id;
@@ -75,6 +76,7 @@ const getOperatingHoursById = async (req, res) => {
         });
     }
 };
+
 const getTouristEntitiesByTime = async (req, res) => {
     try {
         const { day_of_week, opening_time, closing_time } = req.query;
