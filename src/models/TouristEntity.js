@@ -75,75 +75,6 @@ const getTouristEntitiesByCategory = async (categoryId) => {
 
 
 
-const getTouristEntitiesByDistrict = async (districtId) => {
-  const query = `
-  SELECT
-      te.id,
-      te.name,
-      te.description,
-      te.location,
-      te.latitude,
-      te.longitude,
-      d.name AS district_name,
-      c.name AS category_name,
-      GROUP_CONCAT(DISTINCT ti.image_path) AS images,
-      GROUP_CONCAT(DISTINCT s.name) AS seasons
-  FROM
-      tourist_entities te
-  INNER JOIN
-      district d ON te.district_id = d.id
-  INNER JOIN
-      categories c ON te.category_id = c.id
-  LEFT JOIN
-      tourism_entities_images ti ON te.id = ti.tourism_entities_id
-  LEFT JOIN
-      seasons_relation sr ON te.id = sr.tourism_entities_id
-  LEFT JOIN
-      seasons s ON sr.season_id = s.id
-  WHERE
-      te.district_id = ?
-  GROUP BY
-      te.id;
-`;
-  const [rows] = await pool.query(query, [districtId]);
-  return rows;
-};
-
-
-const getTouristEntitiesBySeason = async (seasonId) => {
-  const query = `
-    SELECT 
-        te.*, 
-        s.name AS season_name, 
-        ti.image_path,
-        d.name AS district_name,
-        CONCAT(
-            GROUP_CONCAT(
-                DISTINCT CONCAT(
-                    oh.day_of_week, ': ', 
-                    TIME_FORMAT(oh.opening_time, '%h:%i %p'), ' - ', 
-                    TIME_FORMAT(oh.closing_time, '%h:%i %p')
-                ) ORDER BY oh.day_of_week SEPARATOR '\n'
-            )
-        ) AS operating_hours
-    FROM 
-        tourist_entities te
-        JOIN seasons_relation sr ON te.id = sr.tourism_entities_id
-        JOIN seasons s ON sr.season_id = s.id
-        LEFT JOIN tourism_entities_images ti ON te.id = ti.tourism_entities_id
-        LEFT JOIN operating_hours oh ON te.id = oh.place_id
-        JOIN district d ON te.district_id = d.id
-    WHERE 
-        sr.season_id = ?
-    GROUP BY 
-        te.id
-  `;
-  const [rows] = await pool.query(query, [seasonId]);
-  return rows;
-};
-
-
-
 
 // const getNearbyTouristEntities = async (latitude, longitude, distance) => {
 //   const query = `
@@ -229,72 +160,11 @@ const getTouristEntityDetailsById = async (id) => {
 
 
 
-const getOperatingHoursById = async (id) => {
-  const query = `
-      SELECT *
-      FROM operating_hours
-      WHERE place_id = ?
-  `;
-  const [rows] = await pool.query(query, [id]);
-  // console.log('Generated SQL query:', rows); 
-  return rows;
-
-};
-
-const getTouristEntitiesByTime = async (day_of_week, opening_time, closing_time) => {
-  let query = `
-    SELECT 
-      te.*,
-      d.name AS district_name,
-      GROUP_CONCAT(
-        DISTINCT CONCAT(
-          oh.day_of_week, ': ', 
-          TIME_FORMAT(oh.opening_time, '%h:%i %p'), ' - ', 
-          TIME_FORMAT(oh.closing_time, '%h:%i %p')
-        ) ORDER BY oh.day_of_week SEPARATOR '\n'
-      ) AS operating_hours,
-      (SELECT image_path FROM tourism_entities_images WHERE tourism_entities_id = te.id LIMIT 1) AS image_url
-    FROM
-      tourist_entities te
-      JOIN district d ON te.district_id = d.id
-      LEFT JOIN operating_hours oh ON te.id = oh.place_id
-    WHERE
-      1 = 1
-  `;
-
-  const params = [];
-  if (day_of_week && opening_time && closing_time) {
-    query += `
-      AND oh.day_of_week = ?
-      AND oh.opening_time <= ?
-      AND oh.closing_time >= ?
-    `;
-    params.push(day_of_week, opening_time, closing_time);
-  }
-
-  query += `
-    GROUP BY 
-      te.id
-  `;
-
-  console.log('Generated SQL query:', query);
-  console.log('Parameters:', params);
-
-  const [rows] = await pool.query(query, params);
-
-  console.log('Fetched rows from database:', rows);
-
-  return rows;
-};
 
 export default {
   getAllTouristEntities,
   getTouristEntityById,
   getTouristEntitiesByCategory,
-  getTouristEntitiesByDistrict,
-  getTouristEntitiesBySeason,
   getNearbyTouristEntities,
   getTouristEntityDetailsById,
-  getOperatingHoursById,
-  getTouristEntitiesByTime
 };

@@ -2,10 +2,14 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import touristEntityRoutes from './routes/touristEntityRoutes.js';
-import adminRoutes from './routes/adminRoutes.js';
+import touristRoutes from './routes/tourism_routes.js';
+import SeasonRoutes from './routes/season_router.js';
+import CategoryRoutes from './routes/category_router.js';
+import DistrictRoutes from './routes/district_router.js';
+import TimeRoutes from './routes/time_router.js';
+import adminRoutes from './routes/auth/admin_routes.js';
 import pool from './config/db.js';
-import authRoutes from './routes/authRoutes.js';
+import authRoutes from './routes/auth/auth_routes.js';
 import authenticateJWT from './middleware/authMiddleware.js';
 dotenv.config();
 
@@ -16,7 +20,19 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // User
-app.use('/', touristEntityRoutes);
+app.use('/', touristRoutes);
+
+// Routes for Season
+app.use('/', SeasonRoutes);
+
+// Routes for Category
+app.use('/', CategoryRoutes);
+
+// Routes for District
+app.use('/', DistrictRoutes);
+
+// Routes for Time
+app.use('/', TimeRoutes);
 
 
 // Admin
