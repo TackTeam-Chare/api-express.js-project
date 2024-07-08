@@ -145,7 +145,36 @@ const getTouristEntitiesBySeason = async (seasonId) => {
 
 
 
-const getNearbyTouristEntities = async (latitude, longitude, distance) => {
+// const getNearbyTouristEntities = async (latitude, longitude, distance) => {
+//   const query = `
+//       SELECT te.*, 
+//              c.name AS category_name, 
+//              d.name AS district_name,
+//              ST_Distance_Sphere(
+//                  point(te.longitude, te.latitude), 
+//                  point(?, ?)
+//              ) AS distance,
+//              GROUP_CONCAT(ti.image_path) AS image_path,
+//               oh.day_of_week,
+//               oh.opening_time,
+//               oh.closing_time
+//       FROM tourist_entities te
+//       JOIN categories c ON te.category_id = c.id
+//       JOIN district d ON te.district_id = d.id
+//       LEFT JOIN tourism_entities_images ti ON te.id = ti.tourism_entities_id
+//       LEFT JOIN operating_hours oh ON te.id = oh.place_id
+//       WHERE ST_Distance_Sphere(
+//                 point(te.longitude, te.latitude), 
+//                 point(?, ?)
+//             ) < ?
+//       GROUP BY te.id,oh.day_of_week
+//       ORDER BY distance;
+//   `;
+//   const [rows] = await pool.query(query, [longitude, latitude, longitude, latitude, distance]);
+//   return rows;
+// };
+
+const getNearbyTouristEntities = async (latitude, longitude, distance, excludeId) => {
   const query = `
       SELECT te.*, 
              c.name AS category_name, 
@@ -154,22 +183,26 @@ const getNearbyTouristEntities = async (latitude, longitude, distance) => {
                  point(te.longitude, te.latitude), 
                  point(?, ?)
              ) AS distance,
-             GROUP_CONCAT(ti.image_path) AS images
+             (SELECT GROUP_CONCAT(image_path) 
+              FROM tourism_entities_images 
+              WHERE tourism_entities_id = te.id) AS image_path,
+             GROUP_CONCAT(DISTINCT oh.day_of_week) AS days_of_week,
+             GROUP_CONCAT(DISTINCT oh.opening_time) AS opening_times,
+             GROUP_CONCAT(DISTINCT oh.closing_time) AS closing_times
       FROM tourist_entities te
       JOIN categories c ON te.category_id = c.id
       JOIN district d ON te.district_id = d.id
-      LEFT JOIN tourism_entities_images ti ON te.id = ti.tourism_entities_id
-      WHERE ST_Distance_Sphere(
+      LEFT JOIN operating_hours oh ON te.id = oh.place_id
+      WHERE te.id != ? AND ST_Distance_Sphere(
                 point(te.longitude, te.latitude), 
                 point(?, ?)
             ) < ?
       GROUP BY te.id
       ORDER BY distance;
   `;
-  const [rows] = await pool.query(query, [longitude, latitude, longitude, latitude, distance]);
+  const [rows] = await pool.query(query, [longitude, latitude, excludeId, longitude, latitude, distance]);
   return rows;
 };
-
 
 
 const getTouristEntityDetailsById = async (id) => {
@@ -179,7 +212,7 @@ const getTouristEntityDetailsById = async (id) => {
              d.name AS district_name,
              GROUP_CONCAT(CONCAT(oh.day_of_week, ' ', oh.opening_time, '-', oh.closing_time)) AS opening_hours,
              GROUP_CONCAT(CONCAT(s.name, ' (', s.date_start, ' - ', s.date_end, ')')) AS seasons,
-             GROUP_CONCAT(ti.image_path) AS images
+             GROUP_CONCAT(ti.image_path) AS image_path
       FROM tourist_entities te
       JOIN categories c ON te.category_id = c.id
       JOIN district d ON te.district_id = d.id
@@ -208,51 +241,47 @@ const getOperatingHoursById = async (id) => {
 
 };
 
-// ฟังก์ชันสำหรับดึงข้อมูล Tourist Entities ตามช่วงเวลาทำการ
 const getTouristEntitiesByTime = async (day_of_week, opening_time, closing_time) => {
   let query = `
-      SELECT 
-          te.*,
-          d.name AS district_name,
-          GROUP_CONCAT(
-              DISTINCT CONCAT(
-                  oh.day_of_week, ': ', 
-                  TIME_FORMAT(oh.opening_time, '%h:%i %p'), ' - ', 
-                  TIME_FORMAT(oh.closing_time, '%h:%i %p')
-              ) ORDER BY oh.day_of_week SEPARATOR '\n'
-          ) AS operating_hours
-      FROM
-          tourist_entities te
-          JOIN district d ON te.district_id = d.id
-          LEFT JOIN operating_hours oh ON te.id = oh.place_id
-      WHERE
-          1 = 1
+    SELECT 
+      te.*,
+      d.name AS district_name,
+      GROUP_CONCAT(
+        DISTINCT CONCAT(
+          oh.day_of_week, ': ', 
+          TIME_FORMAT(oh.opening_time, '%h:%i %p'), ' - ', 
+          TIME_FORMAT(oh.closing_time, '%h:%i %p')
+        ) ORDER BY oh.day_of_week SEPARATOR '\n'
+      ) AS operating_hours,
+      (SELECT image_path FROM tourism_entities_images WHERE tourism_entities_id = te.id LIMIT 1) AS image_url
+    FROM
+      tourist_entities te
+      JOIN district d ON te.district_id = d.id
+      LEFT JOIN operating_hours oh ON te.id = oh.place_id
+    WHERE
+      1 = 1
   `;
 
-  // เพิ่มเงื่อนไขการค้นหาเวลาทำการ
   const params = [];
   if (day_of_week && opening_time && closing_time) {
     query += `
-        AND oh.day_of_week = ?
-        AND oh.opening_time <= ?
-        AND oh.closing_time >= ?
+      AND oh.day_of_week = ?
+      AND oh.opening_time <= ?
+      AND oh.closing_time >= ?
     `;
     params.push(day_of_week, opening_time, closing_time);
   }
 
   query += `
-      GROUP BY 
-          te.id
+    GROUP BY 
+      te.id
   `;
 
-  // Log the generated SQL query and parameters
   console.log('Generated SQL query:', query);
   console.log('Parameters:', params);
 
-  // ส่ง query ไปยังฐานข้อมูล MySQL พร้อมกับพารามิเตอร์ที่ระบุ
   const [rows] = await pool.query(query, params);
 
-  // Log the fetched rows
   console.log('Fetched rows from database:', rows);
 
   return rows;

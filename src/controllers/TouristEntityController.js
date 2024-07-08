@@ -84,38 +84,61 @@ const getTouristEntitiesBySeason = async (req, res) => {
 
 // สถานที่เลือกเเละสถานที่ใกล้เคียง
 
+// const getNearbyTouristEntitiesHandler = async (req, res) => {
+//     try {
+//         const id = req.params.id;
+//         let {
+//             radius = 1500
+//         } = req.query;
+//         radius = parseInt(radius, 10);
+//         if (isNaN(radius) || radius <= 0) {
+//             radius = 1500;
+//         }
+
+//         const entity = await TouristEntity.getTouristEntityDetailsById(id);
+//         if (!entity) {
+//             return res.status(404).json({
+//                 error: 'Tourist entity not found'
+//             });
+//         }
+
+//         const nearbyEntities = await TouristEntity.getNearbyTouristEntities(entity.latitude, entity.longitude, radius);
+
+//         res.json({
+//             entity,
+//             nearbyEntities
+//         });
+//     } catch (error) {
+//         console.error('Error fetching tourist entity details:', error);
+//         res.status(500).json({
+//             error: 'Internal server error'
+//         });
+//     }
+// };
+
 const getNearbyTouristEntitiesHandler = async (req, res) => {
     try {
         const id = req.params.id;
-        let {
-            radius = 5000
-        } = req.query;
+        let { radius = 1500 } = req.query;
         radius = parseInt(radius, 10);
         if (isNaN(radius) || radius <= 0) {
-            radius = 5000;
+            radius = 1500;
         }
 
         const entity = await TouristEntity.getTouristEntityDetailsById(id);
         if (!entity) {
-            return res.status(404).json({
-                error: 'Tourist entity not found'
-            });
+            return res.status(404).json({ error: 'Tourist entity not found' });
         }
 
-        const nearbyEntities = await TouristEntity.getNearbyTouristEntities(entity.latitude, entity.longitude, radius);
+        // ดึงข้อมูลสถานที่ท่องเที่ยวใกล้เคียง โดยไม่รวมตัวเอง
+        const nearbyEntities = await TouristEntity.getNearbyTouristEntities(entity.latitude, entity.longitude, radius, id);
 
-        res.json({
-            entity,
-            nearbyEntities
-        });
+        res.json({ entity, nearbyEntities });
     } catch (error) {
         console.error('Error fetching tourist entity details:', error);
-        res.status(500).json({
-            error: 'Internal server error'
-        });
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
-
 
 
 
