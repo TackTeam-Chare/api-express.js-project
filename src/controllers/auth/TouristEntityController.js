@@ -64,10 +64,26 @@ const getNearbyTouristEntitiesHandler = async (req, res) => {
 };
 
 // Create a new tourist entity
+// const createTouristEntity = async (req, res) => {
+//     const touristEntity = req.body;
+//     try {
+//         const insertId = await TouristModel.create(touristEntity);
+//         res.json({
+//             message: 'Tourist entity created successfully',
+//             id: insertId
+//         });
+//     } catch (error) {
+//         res.status(500).json({
+//             error: error.message
+//         });
+//     }
+// };
+
 const createTouristEntity = async (req, res) => {
     const touristEntity = req.body;
+    const createdBy = req.user.id; // Assuming req.user.id contains the ID of the authenticated admin
     try {
-        const insertId = await TouristModel.create(touristEntity);
+        const insertId = await TouristModel.create(touristEntity, createdBy);
         res.json({
             message: 'Tourist entity created successfully',
             id: insertId

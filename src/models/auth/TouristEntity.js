@@ -108,18 +108,31 @@ const getTouristEntityDetailsById = async (id) => {
   return rows[0];
 };
 
-const create = async (touristEntity) => {
-  const {name, description, location, latitude, longitude, district_id, category_id, created_by } = touristEntity;
-  if (!created_by) {
-      throw new Error("created_by cannot be null");
-  }
+// const create = async (touristEntity) => {
+//   const {name, description, location, latitude, longitude, district_id, category_id, created_by } = touristEntity;
+//   if (!created_by) {
+//       throw new Error("created_by cannot be null");
+//   }
+//   try {
+//       const result = await pool.query('INSERT INTO tourist_entities (name, description, location, latitude, longitude, district_id, category_id, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [name, description, location, latitude, longitude, district_id, category_id, created_by]);
+//       return result.insertId;
+//   } catch (error) {
+//       throw error;
+//   }
+// };
+
+// TouristEntity.js
+const create = async (touristEntity, createdBy) => {
+  const { name, description, location, latitude, longitude, district_id, category_id } = touristEntity;
   try {
-      const result = await pool.query('INSERT INTO tourist_entities (name, description, location, latitude, longitude, district_id, category_id, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [name, description, location, latitude, longitude, district_id, category_id, created_by]);
+      const result = await pool.query('INSERT INTO tourist_entities (name, description, location, latitude, longitude, district_id, category_id, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [name, description, location, latitude, longitude, district_id, category_id, createdBy]);
       return result.insertId;
   } catch (error) {
       throw error;
   }
 };
+
+
 // Update a tourist entity
 const update = async (id, touristEntity) => {
   const { name, description, location, latitude, longitude, district_id, category_id } = touristEntity;
