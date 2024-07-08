@@ -1,7 +1,12 @@
 import pool from '../config/db.js';
 
+const getAllCategories = async () => {
+  const query = `SELECT * FROM categories`;
+  const [rows] = await pool.query(query);
+  return rows;
+};
+
 const getTouristEntitiesByCategory = async (categoryId) => {
-  // Query หลักเพื่อดึงข้อมูลทั่วไปของสถานที่ท่องเที่ยว
   const query = `
     SELECT 
       te.*, 
@@ -47,5 +52,6 @@ const getTouristEntitiesByCategory = async (categoryId) => {
 };
 
 export default {
+  getAllCategories,
   getTouristEntitiesByCategory,
 };

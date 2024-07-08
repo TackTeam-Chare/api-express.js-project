@@ -1,5 +1,12 @@
 import pool from '../config/db.js';
 
+// Get all seasons
+const getAllSeasons = async () => {
+    const query = 'SELECT * FROM seasons';
+    const [rows] = await pool.query(query);
+    return rows;
+};
+
 const getTouristEntitiesBySeason = async (seasonId) => {
   const query = `
     SELECT
@@ -41,5 +48,6 @@ const getTouristEntitiesBySeason = async (seasonId) => {
 
 
 export default {
-  getTouristEntitiesBySeason,
+    getAllSeasons,
+    getTouristEntitiesBySeason,
 };

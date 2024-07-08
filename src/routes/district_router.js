@@ -3,6 +3,7 @@ import DistrictEntityController from '../controllers/DistrictEntityController.js
 
 const router = express.Router();
 
-router.get('/district/:districtId', DistrictEntityController.getTouristEntitiesByDistrict);
+router.get('/districts', DistrictEntityController.getAllDistricts);
+router.get('/districts/:districtId', DistrictEntityController.getTouristEntitiesByDistrict);
 
 export default router;

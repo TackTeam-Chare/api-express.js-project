@@ -3,6 +3,7 @@ import SeasonEntityController from '../controllers/SeasonEntityController.js';
 
 const router = express.Router();
 
-router.get('/season/:seasonId', SeasonEntityController.getTouristEntitiesBySeason);
+router.get('/seasons', SeasonEntityController.getAllSeasons);
+router.get('/seasons/:seasonId', SeasonEntityController.getTouristEntitiesBySeason);
 
 export default router;

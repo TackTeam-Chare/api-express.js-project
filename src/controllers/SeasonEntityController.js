@@ -1,5 +1,16 @@
 import SeasonModel from '../models/Season.js';
 
+const getAllSeasons = async (req, res) => {
+    try {
+        const seasons = await SeasonModel.getAllSeasons();
+        res.json(seasons);
+    } catch (error) {
+        console.error('Error fetching seasons:', error);
+        res.status(500).json({
+            error: 'Internal server error'
+        });
+    }
+};
 
 const getTouristEntitiesBySeason = async (req, res) => {
     try {
@@ -15,5 +26,6 @@ const getTouristEntitiesBySeason = async (req, res) => {
 };
 
 export default {
+    getAllSeasons,
     getTouristEntitiesBySeason,
 };

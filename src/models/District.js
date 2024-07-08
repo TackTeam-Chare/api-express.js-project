@@ -1,5 +1,13 @@
 import pool from '../config/db.js';
 
+
+// Get all districts
+const getAllDistricts = async () => {
+    const query = 'SELECT * FROM district';
+    const [rows] = await pool.query(query);
+    return rows;
+};
+
 const getTouristEntitiesByDistrict = async (districtId) => {
   const query = `
   SELECT
@@ -35,5 +43,6 @@ const getTouristEntitiesByDistrict = async (districtId) => {
 };
 
 export default {
+  getAllDistricts,
   getTouristEntitiesByDistrict
 };

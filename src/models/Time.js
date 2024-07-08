@@ -1,5 +1,13 @@
 import pool from '../config/db.js';
 
+// Get all operating hours
+const getAllOperatingHours = async () => {
+  const query = 'SELECT * FROM operating_hours';
+  const [rows] = await pool.query(query);
+  return rows;
+};
+
+
 const getOperatingHoursById = async (id) => {
     const query = `
         SELECT *
@@ -58,6 +66,7 @@ const getOperatingHoursById = async (id) => {
   };
   
 export default {
-    getOperatingHoursById,
-    getTouristEntitiesByTime
+  getAllOperatingHours,
+  getOperatingHoursById,
+  getTouristEntitiesByTime
 };

@@ -1,5 +1,16 @@
 import TimeModel from '../models/Time.js';
 
+const getAllOperatingHours = async (req, res) => {
+    try {
+        const operatingHours = await TimeModel.getAllOperatingHours();
+        res.json(operatingHours);
+    } catch (error) {
+        console.error('Error fetching operating hours:', error);
+        res.status(500).json({
+            error: 'Internal server error'
+        });
+    }
+};
 
 const getOperatingHoursById = async (req, res) => {
     try {
@@ -39,6 +50,7 @@ const getTouristEntitiesByTime = async (req, res) => {
 
 
 export default {
+    getAllOperatingHours,
     getOperatingHoursById,
     getTouristEntitiesByTime
 };
