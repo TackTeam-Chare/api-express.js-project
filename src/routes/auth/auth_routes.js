@@ -7,7 +7,9 @@ const router = express.Router();
 // Admin
 router.post('/login', AuthController.login); // ไม่ใช้ token
 router.post('/register', AuthController.createAdmin); // ไม่ใช้ token
-router.post('/logout', authenticateJWT,AuthController.logout); // logout 
+
+// token-based authentication
+router.post('/logout', authenticateJWT,AuthController.logout); // logout ลบ token
 router.get('/profile',authenticateJWT, AuthController.getProfile); // getByToken
 router.put('/profile',authenticateJWT, AuthController.updateProfile); // update by token
 router.get('/admin',authenticateJWT, AuthController.getAllAdmins); // getAllFetch Admin
