@@ -1,10 +1,9 @@
-import pool from '../config/db.js';
+import pool from '../../config/db.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
 dotenv.config();
-
 
 const createAdmin = async (req, res) => {
     const { username, password, name } = req.body;
@@ -151,6 +150,7 @@ const logout = async (req, res) => {
 
 export default {
     createAdmin,
+    storeToken,
     login,
     getProfile,
     updateProfile,
