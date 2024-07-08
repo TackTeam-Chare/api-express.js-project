@@ -15,6 +15,12 @@ const router = express.Router();
 router.get('/tourist-entities', TouristEntityController.getAllTouristEntities); // ดึงข้อมูลตารางสถานที่ทั้งหมด
 router.get('/tourist-entities/:id', TouristEntityController.getTouristEntityById); // ดึงข้อมูลตารางสถานที่ด้วยไอดี
 router.get('/tourist-entities/:id/nearby', TouristEntityController.getNearbyTouristEntitiesHandler); // ดึงข้อมูลตารางสถานที่ด้วยไอดีและสถานที่ใกล้เคียง
+
+// ต้องระบุ    "district_id", "category_id"
+router.post('/tourist-entities/old', TouristEntityController.createTouristEntityOld); // สร้างข้อมูลสถานที่ท่องเที่ยวใหม่
+router.put('/tourist-entities/old/:id', TouristEntityController.updateTouristEntityOld); // อัปเดตข้อมูลสถานที่ท่องเที่ยวตามไอดี
+
+
 router.post('/tourist-entities', TouristEntityController.createTouristEntity); // สร้างข้อมูลสถานที่ท่องเที่ยวใหม่
 router.put('/tourist-entities/:id', TouristEntityController.updateTouristEntity); // อัปเดตข้อมูลสถานที่ท่องเที่ยวตามไอดี
 router.delete('/tourist-entities/:id', TouristEntityController.deleteTouristEntity); // ลบข้อมูลสถานที่ท่องเที่ยวตามไอดี

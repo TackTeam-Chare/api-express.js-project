@@ -76,6 +76,15 @@ const getTouristEntitiesByCategory = async (categoryId) => {
   return rows;
 };
 
+// CategoryModel.js
+const getIdByName = async (name) => {
+  const [rows] = await pool.query('SELECT id FROM categories WHERE name = ?', [name]);
+  if (rows.length > 0) {
+      return rows[0].id;
+  } else {
+      throw new Error(`Category '${name}' not found`);
+  }
+};
 export default {
   getAllCategories,
   getCategoryById,
@@ -83,4 +92,5 @@ export default {
   update,
   remove,
   getTouristEntitiesByCategory,
+  getIdByName
 };

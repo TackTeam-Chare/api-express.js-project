@@ -1,4 +1,6 @@
 import TouristModel from '../../models/auth/TouristEntity.js';
+import DistrictModel from '../../models/auth/District.js';
+import CategoryModel from '../../models/auth/Category.js';
 
 
 const getAllTouristEntities = async (req, res) => {
@@ -79,11 +81,11 @@ const getNearbyTouristEntitiesHandler = async (req, res) => {
 //     }
 // };
 
-const createTouristEntity = async (req, res) => {
+const createTouristEntityOld = async (req, res) => {
     const touristEntity = req.body;
     const createdBy = req.user.id; // Assuming req.user.id contains the ID of the authenticated admin
     try {
-        const insertId = await TouristModel.create(touristEntity, createdBy);
+        const insertId = await TouristModel.createOld(touristEntity, createdBy);
         res.json({
             message: 'Tourist entity created successfully',
             id: insertId
@@ -96,10 +98,69 @@ const createTouristEntity = async (req, res) => {
 };
 
 // Update a tourist entity
-const updateTouristEntity = async (req, res) => {
+const updateTouristEntityOld = async (req, res) => {
     const id = req.params.id;
     const touristEntity = req.body;
     try {
+        const affectedRows = await TouristModel.updateOld(id, touristEntity);
+        if (affectedRows > 0) {
+            res.json({
+                message: `Tourist entity with ID ${id} updated successfully`
+            });
+        } else {
+            res.status(404).json({
+                error: 'Tourist entity not found'
+            });
+        }
+    } catch (error) {
+        res.status(500).json({
+            error: error.message
+        });
+    }
+};
+
+
+const createTouristEntity = async (req, res) => {
+    const touristEntity = req.body;
+    const { district_name, category_name } = touristEntity;
+
+    try {
+        const districtId = await DistrictModel.getIdByName(district_name);
+        const categoryId = await CategoryModel.getIdByName(category_name);
+
+        touristEntity.district_id = districtId;
+        touristEntity.category_id = categoryId;
+
+        // Assuming you have a way to get the created_by automatically (e.g., from req.user or a session)
+        touristEntity.created_by = req.user.id; // Adjust this based on your authentication setup
+
+        const insertId = await TouristModel.create(touristEntity);
+        res.json({
+            message: 'Tourist entity created successfully',
+            id: insertId
+        });
+    } catch (error) {
+        res.status(500).json({
+            error: error.message
+        });
+    }
+};
+
+// Note: Ensure req.user or your authentication context provides the correct created_by value.
+
+
+const updateTouristEntity = async (req, res) => {
+    const id = req.params.id;
+    const touristEntity = req.body;
+    const { district_name, category_name } = touristEntity;
+
+    try {
+        const districtId = await DistrictModel.getIdByName(district_name);
+        const categoryId = await CategoryModel.getIdByName(category_name);
+
+        touristEntity.district_id = districtId;
+        touristEntity.category_id = categoryId;
+
         const affectedRows = await TouristModel.update(id, touristEntity);
         if (affectedRows > 0) {
             res.json({
@@ -142,6 +203,8 @@ export default {
     getAllTouristEntities,
     getTouristEntityById,
     getNearbyTouristEntitiesHandler,
+    createTouristEntityOld,
+    updateTouristEntityOld,
     createTouristEntity,
     updateTouristEntity,
     deleteTouristEntity,

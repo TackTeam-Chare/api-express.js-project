@@ -66,11 +66,22 @@ const getTouristEntitiesByDistrict = async (districtId) => {
   return rows;
 };
 
+// DistrictModel.js
+const getIdByName = async (name) => {
+  const [rows] = await pool.query('SELECT id FROM district WHERE name = ?', [name]);
+  if (rows.length > 0) {
+      return rows[0].id;
+  } else {
+      throw new Error(`District '${name}' not found`);
+  }
+};
+
 export default {
   getAllDistricts,
   getDistrictById,
   create,
   update,
   remove,
-  getTouristEntitiesByDistrict
+  getTouristEntitiesByDistrict,
+  getIdByName
 };
