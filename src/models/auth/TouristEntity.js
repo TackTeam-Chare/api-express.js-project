@@ -1,6 +1,7 @@
 import pool from '../../config/db.js';
 import DistrictModel from '../../models/auth/District.js';
 import CategoryModel from '../../models/auth/Category.js';
+import SeasonModel from '../../models/auth/Season.js';
 
 const getAllTouristEntities = async () => {
   const query = `
@@ -145,48 +146,51 @@ const updateOld = async (id, touristEntity) => {
   }
 };
 
+
+
 const create = async (touristEntity) => {
-  const { name, description, location, latitude, longitude, district_id, category_id, created_by, district_name, category_name } = touristEntity;
+    const { name, description, location, latitude, longitude, district_name, category_name, season_name, created_by } = touristEntity;
 
-  if (district_name && category_name) {
-      const districtId = await DistrictModel.getIdByName(district_name);
-      const categoryId = await CategoryModel.getIdByName(category_name);
-      touristEntity.district_id = districtId;
-      touristEntity.category_id = categoryId;
-  }
+    if (district_name && category_name && season_name) {
+        const districtId = await DistrictModel.getIdByName(district_name);
+        const categoryId = await CategoryModel.getIdByName(category_name);
+        const seasonId = await SeasonModel.getIdByName(season_name);
+        touristEntity.district_id = districtId;
+        touristEntity.category_id = categoryId;
+        touristEntity.season_id = seasonId;
+    }
 
-  // If created_by is not provided, you can set it here based on your logic (e.g., from session or authentication context)
-  if (!created_by) {
-      // Example: assuming created_by should be set from req.user.id
-      touristEntity.created_by = req.user.id; // Adjust based on your authentication setup
-  }
+    if (!created_by) {
+        touristEntity.created_by = req.user.id;
+    }
 
-  try {
-      const result = await pool.query('INSERT INTO tourist_entities (name, description, location, latitude, longitude, district_id, category_id, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [name, description, location, latitude, longitude, touristEntity.district_id, touristEntity.category_id, touristEntity.created_by]);
-      return result.insertId;
-  } catch (error) {
-      throw error;
-  }
+    try {
+        const result = await pool.query('INSERT INTO tourist_entities (name, description, location, latitude, longitude, district_id, category_id, season_id, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [name, description, location, latitude, longitude, touristEntity.district_id, touristEntity.category_id, touristEntity.season_id, touristEntity.created_by]);
+        return result.insertId;
+    } catch (error) {
+        throw error;
+    }
 };
 
 const update = async (id, touristEntity) => {
-  const { name, description, location, latitude, longitude, district_id, category_id, district_name, category_name } = touristEntity;
+    const { name, description, location, latitude, longitude, district_name, category_name, season_name } = touristEntity;
 
-  if (district_name && category_name) {
-      const districtId = await DistrictModel.getIdByName(district_name);
-      const categoryId = await CategoryModel.getIdByName(category_name);
-      touristEntity.district_id = districtId;
-      touristEntity.category_id = categoryId;
-  }
+    if (district_name && category_name && season_name) {
+        const districtId = await DistrictModel.getIdByName(district_name);
+        const categoryId = await CategoryModel.getIdByName(category_name);
+        const seasonId = await SeasonModel.getIdByName(season_name);
+        touristEntity.district_id = districtId;
+        touristEntity.category_id = categoryId;
+        touristEntity.season_id = seasonId;
+    }
 
-  try {
-      const result = await pool.query('UPDATE tourist_entities SET name=?, description=?, location=?, latitude=?, longitude=?, district_id=?, category_id=? WHERE id=?', [name, description, location, latitude, longitude, touristEntity.district_id, touristEntity.category_id, id]);
-      return result[0].affectedRows; // Return affectedRows from update operation
-  } catch (error) {
-      throw error;
-  }
+    try {
+        const result = await pool.query('UPDATE tourist_entities SET name=?, description=?, location=?, latitude=?, longitude=?, district_id=?, category_id=?, season_id=? WHERE id=?', [name, description, location, latitude, longitude, touristEntity.district_id, touristEntity.category_id, touristEntity.season_id, id]);
+        return result[0].affectedRows;
+    } catch (error) {
+        throw error;
+    }
 };
-
 
 // Delete a tourist entity
 const remove = async (id) => {

@@ -1,7 +1,7 @@
 import TouristModel from '../../models/auth/TouristEntity.js';
 import DistrictModel from '../../models/auth/District.js';
 import CategoryModel from '../../models/auth/Category.js';
-
+import SeasonModel from '../../models/auth/Season.js';
 
 const getAllTouristEntities = async (req, res) => {
     try {
@@ -122,17 +122,17 @@ const updateTouristEntityOld = async (req, res) => {
 
 const createTouristEntity = async (req, res) => {
     const touristEntity = req.body;
-    const { district_name, category_name } = touristEntity;
+    const { district_name, category_name, season_name } = touristEntity;
 
     try {
         const districtId = await DistrictModel.getIdByName(district_name);
         const categoryId = await CategoryModel.getIdByName(category_name);
+        const seasonId = await SeasonModel.getIdByName(season_name);
 
         touristEntity.district_id = districtId;
         touristEntity.category_id = categoryId;
-
-        // Assuming you have a way to get the created_by automatically (e.g., from req.user or a session)
-        touristEntity.created_by = req.user.id; // Adjust this based on your authentication setup
+        touristEntity.season_id = seasonId;
+        touristEntity.created_by = req.user.id;
 
         const insertId = await TouristModel.create(touristEntity);
         res.json({
@@ -146,20 +146,19 @@ const createTouristEntity = async (req, res) => {
     }
 };
 
-// Note: Ensure req.user or your authentication context provides the correct created_by value.
-
-
 const updateTouristEntity = async (req, res) => {
     const id = req.params.id;
     const touristEntity = req.body;
-    const { district_name, category_name } = touristEntity;
+    const { district_name, category_name, season_name } = touristEntity;
 
     try {
         const districtId = await DistrictModel.getIdByName(district_name);
         const categoryId = await CategoryModel.getIdByName(category_name);
+        const seasonId = await SeasonModel.getIdByName(season_name);
 
         touristEntity.district_id = districtId;
         touristEntity.category_id = categoryId;
+        touristEntity.season_id = seasonId;
 
         const affectedRows = await TouristModel.update(id, touristEntity);
         if (affectedRows > 0) {
@@ -177,7 +176,6 @@ const updateTouristEntity = async (req, res) => {
         });
     }
 };
-
 // Delete a tourist entity
 const deleteTouristEntity = async (req, res) => {
     const id = req.params.id;
