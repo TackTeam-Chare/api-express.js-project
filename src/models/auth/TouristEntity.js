@@ -1,7 +1,6 @@
 import pool from '../../config/db.js';
 import DistrictModel from '../../models/auth/District.js';
 import CategoryModel from '../../models/auth/Category.js';
-import SeasonModel from '../../models/auth/Season.js';
 
 const getAllTouristEntities = async () => {
   const query = `
@@ -146,51 +145,74 @@ const updateOld = async (id, touristEntity) => {
   }
 };
 
+const create = async (touristEntity, imagePaths) => {
+  const { name, description, location, latitude, longitude, district_id, category_id, created_by } = touristEntity;
 
+  const conn = await pool.getConnection();
+  try {
+      await conn.beginTransaction();
 
-const create = async (touristEntity) => {
-    const { name, description, location, latitude, longitude, district_name, category_name, season_name, created_by } = touristEntity;
+      const [result] = await conn.query(
+          'INSERT INTO tourist_entities (name, description, location, latitude, longitude, district_id, category_id, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          [name, description, location, latitude, longitude, district_id, category_id, created_by]
+      );
 
-    if (district_name && category_name && season_name) {
-        const districtId = await DistrictModel.getIdByName(district_name);
-        const categoryId = await CategoryModel.getIdByName(category_name);
-        const seasonId = await SeasonModel.getIdByName(season_name);
-        touristEntity.district_id = districtId;
-        touristEntity.category_id = categoryId;
-        touristEntity.season_id = seasonId;
-    }
+      const tourismEntitiesId = result.insertId;
 
-    if (!created_by) {
-        touristEntity.created_by = req.user.id;
-    }
+      if (imagePaths && imagePaths.length > 0) {
+          const imageInsertPromises = imagePaths.map((imagePath) =>
+              conn.query(
+                  'INSERT INTO tourism_entities_images (tourism_entities_id, image_path) VALUES (?, ?)',
+                  [tourismEntitiesId, imagePath]
+              )
+          );
+          await Promise.all(imageInsertPromises);
+      }
 
-    try {
-        const result = await pool.query('INSERT INTO tourist_entities (name, description, location, latitude, longitude, district_id, category_id, season_id, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [name, description, location, latitude, longitude, touristEntity.district_id, touristEntity.category_id, touristEntity.season_id, touristEntity.created_by]);
-        return result.insertId;
-    } catch (error) {
-        throw error;
-    }
+      await conn.commit();
+      return tourismEntitiesId;
+  } catch (error) {
+      await conn.rollback();
+      throw error;
+  } finally {
+      conn.release();
+  }
 };
 
-const update = async (id, touristEntity) => {
-    const { name, description, location, latitude, longitude, district_name, category_name, season_name } = touristEntity;
+const update = async (id, touristEntity, imagePaths) => {
+  const { name, description, location, latitude, longitude, district_id, category_id } = touristEntity;
 
-    if (district_name && category_name && season_name) {
-        const districtId = await DistrictModel.getIdByName(district_name);
-        const categoryId = await CategoryModel.getIdByName(category_name);
-        const seasonId = await SeasonModel.getIdByName(season_name);
-        touristEntity.district_id = districtId;
-        touristEntity.category_id = categoryId;
-        touristEntity.season_id = seasonId;
-    }
+  const conn = await pool.getConnection();
+  try {
+      await conn.beginTransaction();
 
-    try {
-        const result = await pool.query('UPDATE tourist_entities SET name=?, description=?, location=?, latitude=?, longitude=?, district_id=?, category_id=?, season_id=? WHERE id=?', [name, description, location, latitude, longitude, touristEntity.district_id, touristEntity.category_id, touristEntity.season_id, id]);
-        return result[0].affectedRows;
-    } catch (error) {
-        throw error;
-    }
+      const [result] = await conn.query(
+          'UPDATE tourist_entities SET name=?, description=?, location=?, latitude=?, longitude=?, district_id=?, category_id=? WHERE id=?',
+          [name, description, location, latitude, longitude, district_id, category_id, id]
+      );
+
+      await conn.query('DELETE FROM tourism_entities_images WHERE tourism_entities_id = ?', [id]);
+
+      if (imagePaths && imagePaths.length > 0) {
+          const imageInsertPromises = imagePaths.map((imagePath) =>
+              conn.query(
+                  'INSERT INTO tourism_entities_images (tourism_entities_id, image_path) VALUES (?, ?)',
+                  [id, imagePath]
+              )
+          );
+          await Promise.all(imageInsertPromises);
+      }
+
+      await conn.commit();
+      return result.affectedRows;
+  } catch (error) {
+      await conn.rollback();
+      throw error;
+  } finally {
+      conn.release();
+  }
 };
+
 
 // Delete a tourist entity
 const remove = async (id) => {

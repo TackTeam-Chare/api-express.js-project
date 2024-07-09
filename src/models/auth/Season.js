@@ -62,14 +62,8 @@ const getTouristEntitiesBySeason = async (seasonId) => {
     return rows;
 };
 
-const getIdByName = async (name) => {
-    const [rows] = await pool.query('SELECT id FROM seasons WHERE name = ?', [name]);
-    if (rows.length > 0) {
-        return rows[0].id;
-    } else {
-        throw new Error(`Season '${name}' not found`);
-    }
-};
+
+
 export default {
     getAllSeasons,
     getSeasonById,
@@ -77,5 +71,5 @@ export default {
     update,
     remove,
     getTouristEntitiesBySeason,
-    getIdByName
+  
 };

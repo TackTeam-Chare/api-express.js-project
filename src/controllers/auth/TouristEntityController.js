@@ -1,7 +1,7 @@
 import TouristModel from '../../models/auth/TouristEntity.js';
 import DistrictModel from '../../models/auth/District.js';
 import CategoryModel from '../../models/auth/Category.js';
-import SeasonModel from '../../models/auth/Season.js';
+
 
 const getAllTouristEntities = async (req, res) => {
     try {
@@ -119,63 +119,60 @@ const updateTouristEntityOld = async (req, res) => {
     }
 };
 
-
 const createTouristEntity = async (req, res) => {
     const touristEntity = req.body;
-    const { district_name, category_name, season_name } = touristEntity;
-
+    const imagePaths = req.files.map(file => `../../../public${file.filename}`); // Adjust the path as needed
+    const { district_name, category_name } = touristEntity;
+  
     try {
-        const districtId = await DistrictModel.getIdByName(district_name);
-        const categoryId = await CategoryModel.getIdByName(category_name);
-        const seasonId = await SeasonModel.getIdByName(season_name);
-
-        touristEntity.district_id = districtId;
-        touristEntity.category_id = categoryId;
-        touristEntity.season_id = seasonId;
-        touristEntity.created_by = req.user.id;
-
-        const insertId = await TouristModel.create(touristEntity);
-        res.json({
-            message: 'Tourist entity created successfully',
-            id: insertId
-        });
+      const districtId = await DistrictModel.getIdByName(district_name);
+      const categoryId = await CategoryModel.getIdByName(category_name);
+  
+      touristEntity.district_id = districtId;
+      touristEntity.category_id = categoryId;
+      touristEntity.created_by = req.user.id; // Assuming user ID is available in req.user
+  
+      const insertId = await TouristModel.create(touristEntity, imagePaths);
+      res.json({
+        message: 'Tourist entity created successfully',
+        id: insertId
+      });
     } catch (error) {
-        res.status(500).json({
-            error: error.message
-        });
+      res.status(500).json({
+        error: error.message
+      });
     }
-};
-
-const updateTouristEntity = async (req, res) => {
+  };
+  
+  const updateTouristEntity = async (req, res) => {
     const id = req.params.id;
     const touristEntity = req.body;
-    const { district_name, category_name, season_name } = touristEntity;
-
+    const imagePaths = req.files.map(file => `/public/uploads${file.filename}`); // Adjust the path as needed
+    const { district_name, category_name } = touristEntity;
+  
     try {
-        const districtId = await DistrictModel.getIdByName(district_name);
-        const categoryId = await CategoryModel.getIdByName(category_name);
-        const seasonId = await SeasonModel.getIdByName(season_name);
-
-        touristEntity.district_id = districtId;
-        touristEntity.category_id = categoryId;
-        touristEntity.season_id = seasonId;
-
-        const affectedRows = await TouristModel.update(id, touristEntity);
-        if (affectedRows > 0) {
-            res.json({
-                message: `Tourist entity with ID ${id} updated successfully`
-            });
-        } else {
-            res.status(404).json({
-                error: 'Tourist entity not found'
-            });
-        }
-    } catch (error) {
-        res.status(500).json({
-            error: error.message
+      const districtId = await DistrictModel.getIdByName(district_name);
+      const categoryId = await CategoryModel.getIdByName(category_name);
+  
+      touristEntity.district_id = districtId;
+      touristEntity.category_id = categoryId;
+  
+      const affectedRows = await TouristModel.update(id, touristEntity, imagePaths);
+      if (affectedRows > 0) {
+        res.json({
+          message: `Tourist entity with ID ${id} updated successfully`
         });
+      } else {
+        res.status(404).json({
+          error: 'Tourist entity not found'
+        });
+      }
+    } catch (error) {
+      res.status(500).json({
+        error: error.message
+      });
     }
-};
+  };
 // Delete a tourist entity
 const deleteTouristEntity = async (req, res) => {
     const id = req.params.id;

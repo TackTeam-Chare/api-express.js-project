@@ -6,6 +6,7 @@ import SeasonsRelationController from '../../controllers/auth/SeasonsRelationCon
 import CategoryEntityController from '../../controllers/auth/CategoryEntityController.js';
 import OperatingHoursEntityController from '../../controllers/auth/OperatingHoursEntityController.js';
 import DistrictEntityController from '../../controllers/auth/DistrictEntityController.js';
+import upload from '../../config/multer.js';
 
 
 const router = express.Router();
@@ -19,17 +20,20 @@ router.get('/tourist-entities/:id/nearby', TouristEntityController.getNearbyTour
 // ต้องระบุ    "district_id", "category_id"
 router.post('/tourist-entities/old', TouristEntityController.createTouristEntityOld); // สร้างข้อมูลสถานที่ท่องเที่ยวใหม่
 router.put('/tourist-entities/old/:id', TouristEntityController.updateTouristEntityOld); // อัปเดตข้อมูลสถานที่ท่องเที่ยวตามไอดี
+// Example route for creating a tourist entity with image uploads
+router.post('/tourist-entities', upload.array('image_paths', 5), TouristEntityController.createTouristEntity);
 
-
-router.post('/tourist-entities', TouristEntityController.createTouristEntity); // สร้างข้อมูลสถานที่ท่องเที่ยวใหม่
-router.put('/tourist-entities/:id', TouristEntityController.updateTouristEntity); // อัปเดตข้อมูลสถานที่ท่องเที่ยวตามไอดี
+// Example route for updating a tourist entity with image uploads
+router.put('/tourist-entities/:id', upload.array('image_paths', 5), TouristEntityController.updateTouristEntity);
 router.delete('/tourist-entities/:id', TouristEntityController.deleteTouristEntity); // ลบข้อมูลสถานที่ท่องเที่ยวตามไอดี
 
 // Tourism Entities Images
 router.get('/tourism-entities-images', TourismEntitiesImagesController.getAllImages); // ดึงข้อมูลตารางสถานที่ทั้งหมด
-router.get('/tourism-entities-images/:id', TourismEntitiesImagesController.getImageById); 
-router.post('/tourism-entities-images', TourismEntitiesImagesController.createImage); // เพิ่มรูปภาพสถานที่ท่องเที่ยว
-router.put('/tourism-entities-images/:id', TourismEntitiesImagesController.updateImage); // เพิ่มรูปภาพสถานที่ท่องเที่ยว
+router.get('/tourism-entities-images/:id', TourismEntitiesImagesController.getImageById);
+router.post('/tourism-entities-images', upload.single('image'), TourismEntitiesImagesController.createImage);
+router.put('/tourism-entities-images/:id', upload.single('image'), TourismEntitiesImagesController.updateImage);
+// router.post('/tourism-entities-images', TourismEntitiesImagesController.createImage); // เพิ่มรูปภาพสถานที่ท่องเที่ยว
+// router.put('/tourism-entities-images/:id', TourismEntitiesImagesController.updateImage); // เพิ่มรูปภาพสถานที่ท่องเที่ยว
 router.delete('/tourism-entities-images/:id', TourismEntitiesImagesController.deleteImage); // ลบรูปภาพสถานที่ท่องเที่ยวตามไอดี
 
 // Operating Hours

@@ -30,6 +30,9 @@ const remove = async (id) => {
   return result.affectedRows;
 };
 
+
+
+
 export default {
   getAllSeasonsRelations,
   getSeasonsRelationById,
