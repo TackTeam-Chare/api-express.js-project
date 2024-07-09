@@ -121,7 +121,7 @@ const updateTouristEntityOld = async (req, res) => {
 
 const createTouristEntity = async (req, res) => {
     const touristEntity = req.body;
-    const imagePaths = req.files.map(file => `../../../public${file.filename}`); // Adjust the path as needed
+    const imagePaths = req.files.map(file => `${file.filename}`); // Adjust the path as needed
     const { district_name, category_name } = touristEntity;
   
     try {

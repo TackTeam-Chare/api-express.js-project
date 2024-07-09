@@ -12,18 +12,26 @@ const getImageById = async (id) => {
   return rows[0];
 };
 
-const create = async (image) => {
-  const query = 'INSERT INTO tourism_entities_images SET ?';
-  const [result] = await pool.query(query, image);
-  return result.insertId;
+const create = async (images) => {
+  const insertIds = [];
+  for (const image of images) {
+      const query = 'INSERT INTO tourism_entity_images SET ?';
+      const [result] = await pool.query(query, image);
+      insertIds.push(result.insertId);
+  }
+  return insertIds;
 };
 
-const update = async (id, image) => {
-  const query = 'UPDATE tourism_entities_images SET ? WHERE id = ?';
-  const [result] = await pool.query(query, [image, id]);
+const update = async (id, imagePaths) => {
+  const deleteQuery = 'DELETE FROM tourism_entities_images WHERE tourism_entities_id = ?';
+  await pool.query(deleteQuery, [id]);
+
+  const insertQuery = 'INSERT INTO tourism_entities_images (tourism_entities_id, image_path) VALUES ?';
+  const values = imagePaths.map(imagePath => [id, imagePath]);
+
+  const [result] = await pool.query(insertQuery, [values]);
   return result.affectedRows;
 };
-
 const remove = async (id) => {
   const query = 'DELETE FROM tourism_entities_images WHERE id = ?';
   const [result] = await pool.query(query, [id]);

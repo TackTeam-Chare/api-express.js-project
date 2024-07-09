@@ -25,36 +25,41 @@ const getImageById = async (req, res) => {
     }
 };
 
-// Create a new image
 const createImage = async (req, res) => {
-    const image = req.body;
     try {
-        const insertId = await TourismEntitiesImagesModel.create(image);
+        const tourism_entities_id = req.body.tourism_entities_id;
+        const images = req.files.map(file => ({
+            tourism_entities_id: tourism_entities_id,
+            image_path: file.filename
+        }));
+
+        const insertIds = await TourismEntitiesImagesModel.create(images);
+
         res.json({
-            message: 'Image created successfully',
-            id: insertId
+            message: 'Images uploaded successfully',
+            ids: insertIds
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
-// Update an image
-const updateImage = async (req, res) => {
+const updateImages = async (req, res) => {
     const id = req.params.id;
-    const image = req.body;
+    const imagePaths = req.files.map(file => file.filename);
+
     try {
-        const affectedRows = await TourismEntitiesImagesModel.update(id, image);
+        const affectedRows = await TourismEntitiesImagesModel.update(id, imagePaths);
+
         if (affectedRows > 0) {
-            res.json({ message: `Image with ID ${id} updated successfully` });
+            res.json({ message: `Images for entity with ID ${id} updated successfully` });
         } else {
-            res.status(404).json({ error: 'Image not found' });
+            res.status(404).json({ error: 'Entity not found or no images updated' });
         }
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
-
 // Delete an image
 const deleteImage = async (req, res) => {
     const id = req.params.id;
@@ -74,6 +79,6 @@ export default {
     getAllImages,
     getImageById,
     createImage,
-    updateImage,
+    updateImages,
     deleteImage,
 };

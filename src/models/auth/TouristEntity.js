@@ -15,18 +15,25 @@ LEFT JOIN tourism_entities_images ti ON te.id = ti.tourism_entities_id;
 };
 
 const getTouristEntityById = async (id) => {
-  const query = `
-      SELECT te.*, c.name AS category_name, d.name AS district_name, ti.image_path
-      FROM tourist_entities te
-      JOIN categories c ON te.category_id = c.id
-      JOIN district d ON te.district_id = d.id
-      LEFT JOIN tourism_entities_images ti ON te.id = ti.tourism_entities_id
-      WHERE te.id = ?
-  `;
-  const [rows] = await pool.query(query, [id]);
-  return rows[0];
-};
-
+    const query = `
+        SELECT 
+          te.*, 
+          c.name AS category_name, 
+          d.name AS district_name, 
+          GROUP_CONCAT(ti.image_path) AS images
+        FROM tourist_entities te
+        JOIN categories c ON te.category_id = c.id
+        JOIN district d ON te.district_id = d.id
+        LEFT JOIN tourism_entities_images ti ON te.id = ti.tourism_entities_id
+        WHERE te.id = ?
+        GROUP BY te.id
+    `;
+    const [rows] = await pool.query(query, [id]);
+    if (rows[0].images) {
+      rows[0].images = rows[0].images.split(',');
+    }
+    return rows[0];
+  };
 
 // const getNearbyTouristEntities = async (latitude, longitude, distance) => {
 //   const query = `

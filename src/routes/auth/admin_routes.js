@@ -30,8 +30,9 @@ router.delete('/tourist-entities/:id', TouristEntityController.deleteTouristEnti
 // Tourism Entities Images
 router.get('/tourism-entities-images', TourismEntitiesImagesController.getAllImages); // ดึงข้อมูลตารางสถานที่ทั้งหมด
 router.get('/tourism-entities-images/:id', TourismEntitiesImagesController.getImageById);
-router.post('/tourism-entities-images', upload.single('image'), TourismEntitiesImagesController.createImage);
-router.put('/tourism-entities-images/:id', upload.single('image'), TourismEntitiesImagesController.updateImage);
+router.post('/tourism-entities-images', upload.array('image_paths', 5), TourismEntitiesImagesController.createImage);
+router.put('/tourism-entities-images/:id', upload.array('image_paths', 5), TourismEntitiesImagesController.updateImages);
+// router.post('/tourism-entities-images', upload.single('image_path'), TourismEntitiesImagesController.createImage);
 // router.post('/tourism-entities-images', TourismEntitiesImagesController.createImage); // เพิ่มรูปภาพสถานที่ท่องเที่ยว
 // router.put('/tourism-entities-images/:id', TourismEntitiesImagesController.updateImage); // เพิ่มรูปภาพสถานที่ท่องเที่ยว
 router.delete('/tourism-entities-images/:id', TourismEntitiesImagesController.deleteImage); // ลบรูปภาพสถานที่ท่องเที่ยวตามไอดี
