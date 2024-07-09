@@ -1,5 +1,5 @@
 import TourismEntitiesImagesModel from '../../models/auth/TourismEntitiesImages.js';
-
+import pool from '../../config/db.js';
 // Get all images
 const getAllImages = async (req, res) => {
     try {
@@ -49,6 +49,13 @@ const updateImages = async (req, res) => {
     const imagePaths = req.files.map(file => file.filename);
 
     try {
+        // ตรวจสอบว่า id มีอยู่ในตาราง tourist_entities
+        const [entity] = await pool.query('SELECT id FROM tourist_entities WHERE id = ?', [id]);
+
+        if (entity.length === 0) {
+            return res.status(404).json({ error: 'Tourist entity not found' });
+        }
+
         const affectedRows = await TourismEntitiesImagesModel.update(id, imagePaths);
 
         if (affectedRows > 0) {
@@ -60,6 +67,8 @@ const updateImages = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+
 // Delete an image
 const deleteImage = async (req, res) => {
     const id = req.params.id;

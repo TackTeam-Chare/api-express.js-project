@@ -1,7 +1,5 @@
 import CategoryModel from '../../models/auth/Category.js';
 
-
-
 const getAllCategories = async (req, res) => {
     try {
         const categories = await CategoryModel.getAllCategories();
@@ -13,7 +11,6 @@ const getAllCategories = async (req, res) => {
         });
     }
 };
-
 
 const getCategoryById = async (req, res) => {
     try {

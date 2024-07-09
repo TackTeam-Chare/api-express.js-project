@@ -199,7 +199,6 @@ const deleteAdmin = async (req, res) => {
     }
 };
 
-
 export default {
     getAllAdmins,
     getAdminById,

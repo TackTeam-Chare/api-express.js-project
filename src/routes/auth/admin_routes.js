@@ -32,6 +32,7 @@ router.get('/tourism-entities-images', TourismEntitiesImagesController.getAllIma
 router.get('/tourism-entities-images/:id', TourismEntitiesImagesController.getImageById);
 router.post('/tourism-entities-images', upload.array('image_paths', 5), TourismEntitiesImagesController.createImage);
 router.put('/tourism-entities-images/:id', upload.array('image_paths', 5), TourismEntitiesImagesController.updateImages);
+
 // router.post('/tourism-entities-images', upload.single('image_path'), TourismEntitiesImagesController.createImage);
 // router.post('/tourism-entities-images', TourismEntitiesImagesController.createImage); // เพิ่มรูปภาพสถานที่ท่องเที่ยว
 // router.put('/tourism-entities-images/:id', TourismEntitiesImagesController.updateImage); // เพิ่มรูปภาพสถานที่ท่องเที่ยว
