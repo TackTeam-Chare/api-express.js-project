@@ -10,6 +10,7 @@ const getAllImages = async (req, res) => {
     }
 };
 
+
 // Get image by ID
 const getImageById = async (req, res) => {
     try {
@@ -67,7 +68,6 @@ const updateImages = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
 
 // Delete an image
 const deleteImage = async (req, res) => {

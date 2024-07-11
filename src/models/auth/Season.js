@@ -26,7 +26,7 @@ const update = async (id, season) => {
 };
 
 const remove = async (id) => {
-    const query = 'DELETE FROM seasons WHERE id = ?';
+    const query = 'DELETE FROM `seasons` WHERE id = ?';
     const [result] = await pool.query(query, [id]);
     return result.affectedRows;
 };

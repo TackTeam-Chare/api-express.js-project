@@ -1,7 +1,7 @@
 import pool from '../../config/db.js';
 
 const getAllSeasonsRelations = async () => {
-  const query = 'SELECT * FROM seasons_relation';
+  const query = 'SELECT * FROM seasons_relation ';
   const [rows] = await pool.query(query);
   return rows;
 };

@@ -64,7 +64,6 @@ const getNearbyTouristEntitiesHandler = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
-
 // Create a new tourist entity
 // const createTouristEntity = async (req, res) => {
 //     const touristEntity = req.body;

@@ -107,29 +107,30 @@ const getTouristEntitiesByCategory = async (categoryId) => {
 
 const getNearbyTouristEntities = async (latitude, longitude, distance, excludeId) => {
   const query = `
-      SELECT te.*, 
-             c.name AS category_name, 
-             d.name AS district_name,
-             ST_Distance_Sphere(
-                 point(te.longitude, te.latitude), 
-                 point(?, ?)
-             ) AS distance,
-             (SELECT GROUP_CONCAT(image_path) 
-              FROM tourism_entities_images 
-              WHERE tourism_entities_id = te.id) AS image_path,
-             GROUP_CONCAT(DISTINCT oh.day_of_week) AS days_of_week,
-             GROUP_CONCAT(DISTINCT oh.opening_time) AS opening_times,
-             GROUP_CONCAT(DISTINCT oh.closing_time) AS closing_times
-      FROM tourist_entities te
-      JOIN categories c ON te.category_id = c.id
-      JOIN district d ON te.district_id = d.id
-      LEFT JOIN operating_hours oh ON te.id = oh.place_id
-      WHERE te.id != ? AND ST_Distance_Sphere(
-                point(te.longitude, te.latitude), 
-                point(?, ?)
-            ) < ?
-      GROUP BY te.id
-      ORDER BY distance;
+    SELECT te.*, 
+       c.name AS category_name, 
+       d.name AS district_name,
+       ST_Distance_Sphere(
+           point(te.longitude, te.latitude), 
+           point(?, ?)
+       ) AS distance,
+       (SELECT GROUP_CONCAT(image_path) 
+        FROM tourism_entities_images 
+        WHERE tourism_entities_id = te.id) AS image_path,
+       GROUP_CONCAT(DISTINCT oh.day_of_week) AS days_of_week,
+       GROUP_CONCAT(DISTINCT oh.opening_time) AS opening_times,
+       GROUP_CONCAT(DISTINCT oh.closing_time) AS closing_times
+FROM tourist_entities te
+JOIN categories c ON te.category_id = c.id
+JOIN district d ON te.district_id = d.id
+LEFT JOIN operating_hours oh ON te.id = oh.place_id
+WHERE te.id != ? AND te.latitude BETWEEN -90 AND 90 AND te.longitude BETWEEN -180 AND 180
+      AND ST_Distance_Sphere(
+              point(te.longitude, te.latitude), 
+              point(?, ?)
+          ) < ?
+GROUP BY te.id
+ORDER BY distance;
   `;
   const [rows] = await pool.query(query, [longitude, latitude, excludeId, longitude, latitude, distance]);
   return rows;
