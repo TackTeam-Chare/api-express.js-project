@@ -8,6 +8,12 @@ const getAllDistricts = async () => {
     return rows;
 };
 
+const getDistrictById = async (id) => {
+    const query = 'SELECT * FROM district WHERE id = ?';
+    const [rows] = await pool.query(query, [id]);
+    return rows[0];
+  };
+
 const getTouristEntitiesByDistrict = async (districtId) => {
   const query = `
   SELECT
@@ -44,5 +50,6 @@ const getTouristEntitiesByDistrict = async (districtId) => {
 
 export default {
   getAllDistricts,
+  getDistrictById,
   getTouristEntitiesByDistrict
 };

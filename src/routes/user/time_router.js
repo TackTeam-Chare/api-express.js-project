@@ -5,7 +5,6 @@ const router = express.Router();
 
 router.get('/operating-hours', OperatingHoursEntityController.getAllOperatingHours);
 router.get('/operating-hours/:id', OperatingHoursEntityController.getOperatingHoursById);
-router.get('/operating-hours/:day_of_week/:opening_time/:closing_time', OperatingHoursEntityController.getTouristEntitiesByTime);
-
+router.get('/tourist-entities/operating-hours/:day_of_week/:opening_time/:closing_time', OperatingHoursEntityController.getTouristEntitiesByTime);
 
 export default router;

@@ -6,6 +6,14 @@ const getAllCategories = async () => {
   return rows;
 };
 
+
+const getCategoryById = async (id) => {
+  const query = 'SELECT * FROM categories WHERE id = ?';
+  const [rows] = await pool.query(query, [id]);
+  return rows[0];
+};
+
+
 const getTouristEntitiesByCategory = async (categoryId) => {
   const query = `
     SELECT 
@@ -53,5 +61,6 @@ const getTouristEntitiesByCategory = async (categoryId) => {
 
 export default {
   getAllCategories,
+  getCategoryById,
   getTouristEntitiesByCategory,
 };

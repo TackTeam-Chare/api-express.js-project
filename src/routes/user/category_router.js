@@ -4,6 +4,7 @@ import CategoryEntityController from '../../controllers/user/CategoryEntityContr
 const router = express.Router();
 
 router.get('/categories', CategoryEntityController.getAllCategories);
-router.get('/categories/:categoryId', CategoryEntityController.getTouristEntitiesByCategory);
+router.get('/categories/:id', CategoryEntityController.getCategoryById);
+router.get('/tourist-entities/categories/:id', CategoryEntityController.getTouristEntitiesByCategory);
 
 export default router;

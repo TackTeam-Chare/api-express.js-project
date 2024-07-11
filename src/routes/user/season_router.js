@@ -4,6 +4,7 @@ import SeasonEntityController from '../../controllers/user/SeasonEntityControlle
 const router = express.Router();
 
 router.get('/seasons', SeasonEntityController.getAllSeasons);
-router.get('/seasons/:seasonId', SeasonEntityController.getTouristEntitiesBySeason);
+router.get('/seasons/:id', SeasonEntityController.getSeasonById);
+router.get('/tourist-entities/seasons/:id', SeasonEntityController.getTouristEntitiesBySeason);
 
 export default router;

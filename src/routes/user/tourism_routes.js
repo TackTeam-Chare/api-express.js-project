@@ -8,9 +8,4 @@ router.get('/tourist-entities', TouristEntityController.getAllTouristEntities);
 router.get('/tourist-entities/:id', TouristEntityController.getTouristEntityById);
 router.get('/tourist-entities/:id/nearby', TouristEntityController.getNearbyTouristEntitiesHandler);
 
-
-
-
-
-
 export default router;

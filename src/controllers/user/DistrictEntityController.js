@@ -12,10 +12,26 @@ const getAllDistricts = async (req, res) => {
     }
 };
 
+// Get district by ID
+const getDistrictById = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const district = await DistrictModel.getDistrictById(id);
+        if (district) {
+            res.json(district);
+        } else {
+            res.status(404).json({ error: 'District not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
 const getTouristEntitiesByDistrict = async (req, res) => {
     try {
-        const districtId = req.params.districtId;
-        const entities = await DistrictModel.getTouristEntitiesByDistrict(districtId);
+        const id = req.params.id;
+        const entities = await DistrictModel.getTouristEntitiesByDistrict(id);
         res.json(entities);
     } catch (error) {
         console.error('Error fetching tourist entities by district:', error);
@@ -27,5 +43,6 @@ const getTouristEntitiesByDistrict = async (req, res) => {
 
 export default {
     getAllDistricts,
+    getDistrictById,
     getTouristEntitiesByDistrict,
 };

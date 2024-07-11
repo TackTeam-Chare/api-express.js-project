@@ -7,6 +7,13 @@ const getAllSeasons = async () => {
     return rows;
 };
 
+const getSeasonById = async (id) => {
+    const query = 'SELECT * FROM seasons WHERE id = ?';
+    const [rows] = await pool.query(query, [id]);
+    return rows[0];
+};
+
+
 const getTouristEntitiesBySeason = async (seasonId) => {
   const query = `
     SELECT
@@ -49,5 +56,6 @@ const getTouristEntitiesBySeason = async (seasonId) => {
 
 export default {
     getAllSeasons,
+    getSeasonById,
     getTouristEntitiesBySeason,
 };
