@@ -5,6 +5,6 @@ const router = express.Router();
 
 router.get('/seasons', SeasonEntityController.getAllSeasons);
 router.get('/seasons/:id', SeasonEntityController.getSeasonById);
-router.get('/tourist-entities/seasons/:id', SeasonEntityController.getTouristEntitiesBySeason);
+router.get('/seasons/:id/place', SeasonEntityController.getTouristEntitiesBySeason);
 
 export default router;

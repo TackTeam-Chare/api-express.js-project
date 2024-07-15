@@ -5,6 +5,6 @@ const router = express.Router();
 
 router.get('/categories', CategoryEntityController.getAllCategories);
 router.get('/categories/:id', CategoryEntityController.getCategoryById);
-router.get('/tourist-entities/categories/:id', CategoryEntityController.getTouristEntitiesByCategory);
+router.get('categories/:id/place', CategoryEntityController.getTouristEntitiesByCategory);
 
 export default router;

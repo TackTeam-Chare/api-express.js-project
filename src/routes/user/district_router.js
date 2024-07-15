@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get('/districts', DistrictEntityController.getAllDistricts);
 router.get('/districts/:id', DistrictEntityController.getDistrictById);
-router.get('/tourist-entities/districts/:id', DistrictEntityController.getTouristEntitiesByDistrict);
+router.get('/districts/:id/place', DistrictEntityController.getTouristEntitiesByDistrict);
 
 
 
