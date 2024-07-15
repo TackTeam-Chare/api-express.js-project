@@ -4,8 +4,8 @@ import TouristEntityController from '../../controllers/user/TouristEntityControl
 const router = express.Router();
 
 // User
-router.get('/tourist-entities', TouristEntityController.getAllTouristEntities);
-router.get('/tourist-entities/:id', TouristEntityController.getTouristEntityById);
-router.get('/tourist-entities/:id/nearby', TouristEntityController.getNearbyTouristEntitiesHandler);
+router.get('/place', TouristEntityController.getAllTouristEntities);
+router.get('/place/:id', TouristEntityController.getTouristEntityById);
+router.get('/place/:id/nearby', TouristEntityController.getNearbyTouristEntitiesHandler);
 
 export default router;

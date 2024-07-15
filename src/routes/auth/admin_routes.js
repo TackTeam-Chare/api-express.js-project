@@ -13,27 +13,27 @@ const router = express.Router();
 
 
 // Tourist Entities
-router.get('/tourist-entities', TouristEntityController.getAllTouristEntities); // ดึงข้อมูลตารางสถานที่ทั้งหมด
-router.get('/tourist-entities/:id', TouristEntityController.getTouristEntityById); // ดึงข้อมูลตารางสถานที่ด้วยไอดี
-router.get('/tourist-entities/:id/nearby', TouristEntityController.getNearbyTouristEntitiesHandler); // ดึงข้อมูลตารางสถานที่ด้วยไอดีและสถานที่ใกล้เคียง
-router.post('/tourist-entities', upload.array('image_paths', 5), TouristEntityController.createTouristEntity);
-router.put('/tourist-entities/:id', upload.array('image_paths', 5), TouristEntityController.updateTouristEntity);
-router.delete('/tourist-entities/:id', TouristEntityController.deleteTouristEntity); // ลบข้อมูลสถานที่ท่องเที่ยวตามไอดี
+router.get('/place', TouristEntityController.getAllTouristEntities); // ดึงข้อมูลตารางสถานที่ทั้งหมด
+router.get('/place/:id', TouristEntityController.getTouristEntityById); // ดึงข้อมูลตารางสถานที่ด้วยไอดี
+router.get('/place/:id/nearby', TouristEntityController.getNearbyTouristEntitiesHandler); // ดึงข้อมูลตารางสถานที่ด้วยไอดีและสถานที่ใกล้เคียง
+router.post('/place', upload.array('image_paths', 5), TouristEntityController.createTouristEntity);
+router.put('/place/:id', upload.array('image_paths', 5), TouristEntityController.updateTouristEntity);
+router.delete('/place/:id', TouristEntityController.deleteTouristEntity); // ลบข้อมูลสถานที่ท่องเที่ยวตามไอดี
 
 // ต้องระบุ    "district_id", "category_id"
-// router.post('/tourist-entities/old', TouristEntityController.createTouristEntityOld); // สร้างข้อมูลสถานที่ท่องเที่ยวใหม่
-// router.put('/tourist-entities/old/:id', TouristEntityController.updateTouristEntityOld); // อัปเดตข้อมูลสถานที่ท่องเที่ยวตามไอดี
+// router.post('/place/old', TouristEntityController.createTouristEntityOld); // สร้างข้อมูลสถานที่ท่องเที่ยวใหม่
+// router.put('/place/old/:id', TouristEntityController.updateTouristEntityOld); // อัปเดตข้อมูลสถานที่ท่องเที่ยวตามไอดี
 
 // Tourism Entities Images
-router.get('/tourism-entities-images', TourismEntitiesImagesController.getAllImages); 
-router.get('/tourism-entities-images/:id', TourismEntitiesImagesController.getImageById);
-router.post('/tourism-entities-images', upload.array('image_paths', 5), TourismEntitiesImagesController.createImage);
-router.put('/tourism-entities-images/:id', upload.array('image_paths', 5), TourismEntitiesImagesController.updateImages);
-router.delete('/tourism-entities-images/:id', TourismEntitiesImagesController.deleteImage);
+router.get('/place/images', TourismEntitiesImagesController.getAllImages); 
+router.get('/place/images:id', TourismEntitiesImagesController.getImageById);
+router.post('/place/images', upload.array('image_paths', 5), TourismEntitiesImagesController.createImage);
+router.put('/place/images/:id', upload.array('image_paths', 5), TourismEntitiesImagesController.updateImages);
+router.delete('/place/images/:id', TourismEntitiesImagesController.deleteImage);
 
-// router.post('/tourism-entities-images', upload.single('image_path'), TourismEntitiesImagesController.createImage);
-// router.post('/tourism-entities-images', TourismEntitiesImagesController.createImage);
-// router.put('/tourism-entities-images/:id', TourismEntitiesImagesController.updateImage);
+// router.post('/place', upload.single('image_path'), TourismEntitiesImagesController.createImage);
+// router.post('/place', TourismEntitiesImagesController.createImage);
+// router.put('/place/:id', TourismEntitiesImagesController.updateImage);
 
 
 // Operating Hours

@@ -10,6 +10,7 @@ router.post('/register', AuthController.createAdmin); // ไม่ใช้ toke
 
 // token-based authentication
 router.post('/logout', authenticateJWT,AuthController.logout); // logout ลบ token
+router.post('/verify-password', authenticateJWT, AuthController.verifyPassword);
 router.get('/profile',authenticateJWT, AuthController.getProfile); // getByToken
 router.put('/profile',authenticateJWT, AuthController.updateProfile); // update by token
 router.get('/admin',authenticateJWT, AuthController.getAllAdmins); // getAllFetch Admin
