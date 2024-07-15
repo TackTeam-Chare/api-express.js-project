@@ -9,17 +9,13 @@ dotenv.config();
 const createAdmin = async (req, res) => {
     const { username, password, name } = req.body;
     try {
-        // ตรวจสอบว่าผู้ใช้มีอยู่ในฐานข้อมูลแล้วหรือไม่
         const [existingAdmin] = await pool.query('SELECT * FROM admin WHERE username = ?', [username]);
         if (existingAdmin.length > 0) {
             return res.status(400).json({ error: 'Username already exists' });
         }
 
-        // แฮชรหัสผ่าน
         const hashedPassword = await bcrypt.hash(password, 10);
-        // บันทึกผู้ใช้ใหม่ลงฐานข้อมูล
         const [result] = await pool.query('INSERT INTO admin (username, password, name) VALUES (?, ?, ?)', [username, hashedPassword, name]);
-        // สร้างและบันทึกโทเค็น
         const token = jwt.sign({ id: result.insertId, username }, process.env.JWT_SECRET, { expiresIn: '1h' });
         await storeToken(result.insertId, token);
         res.json({ message: 'Admin created successfully', id: result.insertId, token });
@@ -59,7 +55,6 @@ const login = async (req, res) => {
     }
 };
 
-
 const getProfile = async (req, res) => {
     try {
         const adminId = req.user.id;
@@ -69,14 +64,10 @@ const getProfile = async (req, res) => {
         if (admin) {
             res.json(admin);
         } else {
-            res.status(404).json({
-                error: 'Admin not found'
-            });
+            res.status(404).json({ error: 'Admin not found' });
         }
     } catch (error) {
-        res.status(500).json({
-            error: error.message
-        });
+        res.status(500).json({ error: error.message });
     }
 };
 
@@ -85,27 +76,35 @@ const updateProfile = async (req, res) => {
     const adminId = req.user.id;
 
     try {
+        // ดึงข้อมูลโปรไฟล์ปัจจุบัน
+        const [currentProfile] = await pool.query('SELECT * FROM admin WHERE id = ?', [adminId]);
+        const currentAdmin = currentProfile[0];
+
         let updates = [];
         let values = [];
 
-        if (name) {
+        // ตรวจสอบและเพิ่มการอัพเดทที่แตกต่างจากข้อมูลเดิม
+        if (name && name !== currentAdmin.name) {
             updates.push('name = ?');
             values.push(name);
         }
 
-        if (username) {
+        if (username && username !== currentAdmin.username) {
             updates.push('username = ?');
             values.push(username);
         }
 
         if (password) {
             const hashedPassword = await bcrypt.hash(password, 10);
+            if (await bcrypt.compare(password, currentAdmin.password)) {
+                return res.status(400).json({ error: 'New password must be different from old password' });
+            }
             updates.push('password = ?');
             values.push(hashedPassword);
         }
 
         if (updates.length === 0) {
-            return res.status(400).json({ error: 'No updates provided' });
+            return res.status(400).json({ error: 'No updates provided or same as current values' });
         }
 
         values.push(adminId);
@@ -203,6 +202,7 @@ const verifyPassword = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 export default {
     getAllAdmins,
     getAdminById,

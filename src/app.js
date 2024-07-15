@@ -18,6 +18,7 @@ const PORT = process.env.PORT;
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // User
 app.use('/', touristRoutes);
@@ -33,7 +34,6 @@ app.use('/', DistrictRoutes);
 
 // Routes for Time
 app.use('/', TimeRoutes);
-
 
 // Admin
 app.use('/auth', authRoutes);

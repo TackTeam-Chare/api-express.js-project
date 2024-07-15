@@ -1,6 +1,5 @@
 import pool from '../../config/db.js';
-import DistrictModel from '../../models/auth/District.js';
-import CategoryModel from '../../models/auth/Category.js';
+
 
 const getAllTouristEntities = async () => {
   const query = `

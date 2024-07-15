@@ -122,26 +122,36 @@ const createTouristEntity = async (req, res) => {
     const touristEntity = req.body;
     const imagePaths = req.files.map(file => `${file.filename}`); // Adjust the path as needed
     const { district_name, category_name } = touristEntity;
-  
+
+    console.log('Received Data:', touristEntity);
+    console.log('Image Paths:', imagePaths);
+
     try {
-      const districtId = await DistrictModel.getIdByName(district_name);
-      const categoryId = await CategoryModel.getIdByName(category_name);
-  
-      touristEntity.district_id = districtId;
-      touristEntity.category_id = categoryId;
-      touristEntity.created_by = req.user.id; // Assuming user ID is available in req.user
-  
-      const insertId = await TouristModel.create(touristEntity, imagePaths);
-      res.json({
-        message: 'Tourist entity created successfully',
-        id: insertId
-      });
+        const districtId = await DistrictModel.getIdByName(district_name);
+        const categoryId = await CategoryModel.getIdByName(category_name);
+
+        touristEntity.district_id = districtId;
+        touristEntity.category_id = categoryId;
+        touristEntity.created_by = req.user.id; // Assuming user ID is available in req.user
+
+        console.log('Tourist Entity to be Inserted:', touristEntity);
+
+        const insertId = await TouristModel.create(touristEntity, imagePaths);
+
+        console.log('Insert ID:', insertId);
+
+        res.json({
+            message: 'Tourist entity created successfully',
+            id: insertId
+        });
     } catch (error) {
-      res.status(500).json({
-        error: error.message
-      });
+        console.error('Error in createTouristEntity:', error);
+        res.status(500).json({
+            error: error.message
+        });
     }
-  };
+};
+
   
   const updateTouristEntity = async (req, res) => {
     const id = req.params.id;
