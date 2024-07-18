@@ -97,25 +97,30 @@ ORDER BY distance;
 
 const getTouristEntityDetailsById = async (id) => {
   const query = `
-      SELECT te.*,
-             c.name AS category_name,
-             d.name AS district_name,
-             GROUP_CONCAT(CONCAT(oh.day_of_week, ' ', oh.opening_time, '-', oh.closing_time)) AS opening_hours,
-             GROUP_CONCAT(CONCAT(s.name, ' (', s.date_start, ' - ', s.date_end, ')')) AS seasons,
-             GROUP_CONCAT(ti.image_path) AS image_path
-      FROM tourist_entities te
-      JOIN categories c ON te.category_id = c.id
-      JOIN district d ON te.district_id = d.id
-      LEFT JOIN operating_hours oh ON te.id = oh.place_id
-      LEFT JOIN seasons_relation sr ON te.id = sr.tourism_entities_id
-      LEFT JOIN seasons s ON sr.season_id = s.id
-      LEFT JOIN tourism_entities_images ti ON te.id = ti.tourism_entities_id
-      WHERE te.id = ?
-      GROUP BY te.id;
+    SELECT 
+      te.*, 
+      c.name AS category_name, 
+      d.name AS district_name, 
+      GROUP_CONCAT(ti.image_path) AS images
+    FROM tourist_entities te
+    JOIN categories c ON te.category_id = c.id
+    JOIN district d ON te.district_id = d.id
+    LEFT JOIN tourism_entities_images ti ON te.id = ti.tourism_entities_id
+    WHERE te.id = ?
+    GROUP BY te.id
   `;
   const [rows] = await pool.query(query, [id]);
+  if (rows.length && rows[0].images) {
+    rows[0].images = rows[0].images.split(',').map(imagePath => ({
+      image_path: imagePath,
+      image_url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${imagePath}`
+    }));
+  }
   return rows[0];
 };
+
+
+
 
 // const create = async (touristEntity) => {
 //   const {name, description, location, latitude, longitude, district_id, category_id, created_by } = touristEntity;
@@ -186,6 +191,7 @@ const create = async (touristEntity, imagePaths) => {
       conn.release();
   }
 };
+
 
 const update = async (id, touristEntity, imagePaths) => {
   const { name, description, location, latitude, longitude, district_id, category_id } = touristEntity;

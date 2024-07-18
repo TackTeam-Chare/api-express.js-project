@@ -23,47 +23,39 @@ const getAllTouristEntities = async (req, res) => {
 
 const getTouristEntityById = async (req, res) => {
     try {
-        const id = req.params.id;
-        const touristEntity = await TouristModel.getTouristEntityById(id);
-
-        if (touristEntity) {
-            res.json(touristEntity);
-        } else {
-            res.status(404).json({
-                error: 'Tourist entity not found'
-            });
-        }
+      const id = req.params.id;
+      const touristEntity = await TouristModel.getTouristEntityDetailsById(id);
+      if (touristEntity) {
+        res.json(touristEntity);
+      } else {
+        res.status(404).json({ error: 'Tourist entity not found' });
+      }
     } catch (error) {
-        console.error('Error fetching tourist entity:', error);
-        res.status(500).json({
-            error: 'Internal server error'
-        });
+      console.error('Error fetching tourist entity:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
-};
-
-const getNearbyTouristEntitiesHandler = async (req, res) => {
+  };
+  
+  const getNearbyTouristEntitiesHandler = async (req, res) => {
     try {
-        const id = req.params.id;
-        let { radius = 1500 } = req.query;
-        radius = parseInt(radius, 10);
-        if (isNaN(radius) || radius <= 0) {
-            radius = 1500;
-        }
-
-        const entity = await TouristModel.getTouristEntityDetailsById(id);
-        if (!entity) {
-            return res.status(404).json({ error: 'Tourist entity not found' });
-        }
-
-
-        const nearbyEntities = await TouristModel.getNearbyTouristEntities(entity.latitude, entity.longitude, radius, id);
-
-        res.json({ entity, nearbyEntities });
+      const id = req.params.id;
+      let { radius = 1500 } = req.query;
+      radius = parseInt(radius, 10);
+      if (isNaN(radius) || radius <= 0) {
+        radius = 1500;
+      }
+      const entity = await TouristModel.getTouristEntityDetailsById(id);
+      if (!entity) {
+        return res.status(404).json({ error: 'Tourist entity not found' });
+      }
+      const nearbyEntities = await TouristModel.getNearbyTouristEntities(entity.latitude, entity.longitude, radius, id);
+      res.json({ entity, nearbyEntities });
     } catch (error) {
-        console.error('Error fetching tourist entity details:', error);
-        res.status(500).json({ error: 'Internal server error' });
+      console.error('Error fetching tourist entity details:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
-};
+  };
+  
 // Create a new tourist entity
 // const createTouristEntity = async (req, res) => {
 //     const touristEntity = req.body;
@@ -152,36 +144,35 @@ const createTouristEntity = async (req, res) => {
     }
 };
 
-  
-  const updateTouristEntity = async (req, res) => {
-    const id = req.params.id;
-    const touristEntity = req.body;
-    const imagePaths = req.files.map(file => `/public/uploads${file.filename}`); // Adjust the path as needed
-    const { district_name, category_name } = touristEntity;
-  
-    try {
-      const districtId = await DistrictModel.getIdByName(district_name);
-      const categoryId = await CategoryModel.getIdByName(category_name);
-  
-      touristEntity.district_id = districtId;
-      touristEntity.category_id = categoryId;
-  
-      const affectedRows = await TouristModel.update(id, touristEntity, imagePaths);
-      if (affectedRows > 0) {
-        res.json({
-          message: `Tourist entity with ID ${id} updated successfully`
-        });
-      } else {
-        res.status(404).json({
-          error: 'Tourist entity not found'
-        });
-      }
-    } catch (error) {
-      res.status(500).json({
-        error: error.message
+const updateTouristEntity = async (req, res) => {
+  const id = req.params.id;
+  const touristEntity = req.body;
+  const imagePaths = req.files.map(file => `/uploads/${file.filename}`); // Adjust the path as needed
+  const { district_name, category_name } = touristEntity;
+
+  try {
+    const districtId = await DistrictModel.getIdByName(district_name);
+    const categoryId = await CategoryModel.getIdByName(category_name);
+
+    touristEntity.district_id = districtId;
+    touristEntity.category_id = categoryId;
+
+    const affectedRows = await update(id, touristEntity, imagePaths);
+    if (affectedRows > 0) {
+      res.json({
+        message: `Tourist entity with ID ${id} updated successfully`
+      });
+    } else {
+      res.status(404).json({
+        error: 'Tourist entity not found'
       });
     }
-  };
+  } catch (error) {
+    res.status(500).json({
+      error: error.message
+    });
+  }
+};
 // Delete a tourist entity
 const deleteTouristEntity = async (req, res) => {
     const id = req.params.id;

@@ -24,25 +24,24 @@ router.delete('/place/:id', TouristEntityController.deleteTouristEntity); // ล
 // router.post('/place/old', TouristEntityController.createTouristEntityOld); // สร้างข้อมูลสถานที่ท่องเที่ยวใหม่
 // router.put('/place/old/:id', TouristEntityController.updateTouristEntityOld); // อัปเดตข้อมูลสถานที่ท่องเที่ยวตามไอดี
 
-// Tourism Entities Images
-router.get('/place/images', TourismEntitiesImagesController.getAllImages); 
-router.get('/place/images:id', TourismEntitiesImagesController.getImageById);
+// Images routes
+router.get('/place/images', TourismEntitiesImagesController.getAllImages);
+router.get('/place/images/:id', TourismEntitiesImagesController.getImageById);
 router.post('/place/images', upload.array('image_paths', 5), TourismEntitiesImagesController.createImage);
 router.put('/place/images/:id', upload.array('image_paths', 5), TourismEntitiesImagesController.updateImages);
 router.delete('/place/images/:id', TourismEntitiesImagesController.deleteImage);
-
 // router.post('/place', upload.single('image_path'), TourismEntitiesImagesController.createImage);
 // router.post('/place', TourismEntitiesImagesController.createImage);
 // router.put('/place/:id', TourismEntitiesImagesController.updateImage);
 
 
 // Operating Hours
-router.get('/operating-hours', OperatingHoursEntityController.getAllOperatingHours); // ดึงข้อมูลเวลาทำการทั้งหมด
-router.get('/operating-hours/:id', OperatingHoursEntityController.getOperatingHoursById); // ดึงข้อมูลเวลาทำการตามไอดี
-router.get('/operating-hours/:day_of_week/:opening_time/:closing_time', OperatingHoursEntityController.getTouristEntitiesByTime); // ดึงข้อมูลสถานที่ท่องเที่ยวตามเวลาที่เปิด-ปิด
-router.post('/operating-hours', OperatingHoursEntityController.createOperatingHours); // เพิ่มเวลาทำการใหม่
-router.put('/operating-hours/:id', OperatingHoursEntityController.updateOperatingHours); // อัปเดตเวลาทำการตามไอดี
-router.delete('/operating-hours/:id', OperatingHoursEntityController.deleteOperatingHours); // ลบเวลาทำการตามไอดี
+router.get('/time', OperatingHoursEntityController.getAllOperatingHours); // ดึงข้อมูลเวลาทำการทั้งหมด
+router.get('/time/:id', OperatingHoursEntityController.getOperatingHoursById); // ดึงข้อมูลเวลาทำการตามไอดี
+router.get('/time/:day_of_week/:opening_time/:closing_time', OperatingHoursEntityController.getTouristEntitiesByTime); // ดึงข้อมูลสถานที่ท่องเที่ยวตามเวลาที่เปิด-ปิด
+router.post('/time', OperatingHoursEntityController.createOperatingHours); // เพิ่มเวลาทำการใหม่
+router.put('/time/:id', OperatingHoursEntityController.updateOperatingHours); // อัปเดตเวลาทำการตามไอดี
+router.delete('/time/:id', OperatingHoursEntityController.deleteOperatingHours); // ลบเวลาทำการตามไอดี
 
 // Seasons
 router.get('/seasons', SeasonEntityController.getAllSeasons); // ดึงข้อมูลฤดูกาลทั้งหมด
@@ -53,11 +52,11 @@ router.put('/seasons/:id', SeasonEntityController.updateSeason); // อัปเ
 router.delete('/seasons/:id', SeasonEntityController.deleteSeason); // ลบฤดูกาลตามไอดี
 
 // Seasons Relation
-router.get('/seasons-relation', SeasonsRelationController.getAllSeasonsRelations); 
-router.get('/seasons-relation/:id', SeasonsRelationController.getSeasonsRelationById); 
-router.post('/seasons-relation', SeasonsRelationController.createSeasonsRelation); // เพิ่มความสัมพันธ์ฤดูกาล
-router.put('/seasons-relation', SeasonsRelationController.updateSeasonsRelation); // เพิ่มความสัมพันธ์ฤดูกาล
-router.delete('/seasons-relation/:id', SeasonsRelationController.deleteSeasonsRelation); // ลบความสัมพันธ์ฤดูกาลตามไอดี
+router.get('/seasons-relation', SeasonsRelationController.getAllSeasonsRelations);
+router.get('/seasons-relation/:id', SeasonsRelationController.getSeasonsRelationById);
+router.post('/seasons-relation', SeasonsRelationController.createSeasonsRelation);
+router.put('/seasons-relation/:id', SeasonsRelationController.updateSeasonsRelation);
+router.delete('/seasons-relation/:id', SeasonsRelationController.deleteSeasonsRelation);
 
 
 // Districts

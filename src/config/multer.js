@@ -7,10 +7,14 @@ const __dirname = path.dirname(__filename);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../../public/uploads')); 
+    const uploadPath = path.join(__dirname, '../../public/uploads');
+    console.log('Upload Path:', uploadPath); // Log the upload path
+    cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`); // Add a timestamp to ensure unique filenames
+    const uniqueName = `${Date.now()}-${file.originalname}`;
+    console.log('Saved Filename:', uniqueName); // Log the saved filename
+    cb(null, uniqueName);
   }
 });
 
