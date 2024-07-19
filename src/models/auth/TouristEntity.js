@@ -34,6 +34,63 @@ const getTouristEntityById = async (id) => {
     return rows[0];
   };
 
+  // const search = async (query) => {
+  //   const searchQuery = `
+  //     SELECT te.*, c.name AS category_name, d.name AS district_name, GROUP_CONCAT(ti.image_path) AS images
+  //     FROM tourist_entities te
+  //     JOIN categories c ON te.category_id = c.id
+  //     JOIN district d ON te.district_id = d.id
+  //     LEFT JOIN tourism_entities_images ti ON te.id = ti.tourism_entities_id
+  //     WHERE te.name LIKE ? OR te.description LIKE ? OR c.name LIKE ? OR d.name LIKE ?
+  //     GROUP BY te.id
+  //   `;
+  //   const [rows] = await pool.query(searchQuery, [`%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`]);
+  //   if (rows.length) {
+  //     rows.forEach(row => {
+  //       if (row.images) {
+  //         row.images = row.images.split(',').map(imagePath => ({
+  //           image_path: imagePath,
+  //           image_url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${imagePath}`
+  //         }));
+  //       }
+  //     });
+  //   }
+  //   return rows;
+  // };
+  const search = async (query) => {
+    const searchQuery = `
+      SELECT 
+        te.*, 
+        c.name AS category_name, 
+        d.name AS district_name, 
+        GROUP_CONCAT(ti.image_path) AS images
+      FROM 
+        tourist_entities te
+      JOIN 
+        categories c ON te.category_id = c.id
+      JOIN 
+        district d ON te.district_id = d.id
+      LEFT JOIN 
+        tourism_entities_images ti ON te.id = ti.tourism_entities_id
+      WHERE 
+        te.name LIKE ? OR te.description LIKE ? OR c.name LIKE ? OR d.name LIKE ?
+      GROUP BY 
+        te.id
+    `;
+    const [rows] = await pool.query(searchQuery, [`%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`]);
+    if (rows.length) {
+      rows.forEach(row => {
+        if (row.images) {
+          row.images = row.images.split(',').map(imagePath => ({
+            image_path: imagePath,
+            image_url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${imagePath}`
+          }));
+        }
+      });
+    }
+    return rows;
+  };
+
 // const getNearbyTouristEntities = async (latitude, longitude, distance) => {
 //   const query = `
 //       SELECT te.*, 
@@ -192,7 +249,7 @@ const create = async (touristEntity, imagePaths) => {
   }
 };
 
-
+// controllers/TouristEntityController.js
 const update = async (id, touristEntity, imagePaths) => {
   const { name, description, location, latitude, longitude, district_id, category_id } = touristEntity;
 
@@ -245,6 +302,7 @@ export default {
   getTouristEntityById,
   getNearbyTouristEntities,
   getTouristEntityDetailsById,
+  search,
   createOld,
   updateOld,
   create,

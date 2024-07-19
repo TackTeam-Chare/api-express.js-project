@@ -11,6 +11,7 @@ import upload from '../../config/multer.js';
 
 const router = express.Router();
 
+router.get('/search', TouristEntityController.searchTouristEntities);
 
 // Tourist Entities
 router.get('/place', TouristEntityController.getAllTouristEntities); // ดึงข้อมูลตารางสถานที่ทั้งหมด
@@ -25,11 +26,11 @@ router.delete('/place/:id', TouristEntityController.deleteTouristEntity); // ล
 // router.put('/place/old/:id', TouristEntityController.updateTouristEntityOld); // อัปเดตข้อมูลสถานที่ท่องเที่ยวตามไอดี
 
 // Images routes
-router.get('/place/images', TourismEntitiesImagesController.getAllImages);
-router.get('/place/images/:id', TourismEntitiesImagesController.getImageById);
-router.post('/place/images', upload.array('image_paths', 5), TourismEntitiesImagesController.createImage);
-router.put('/place/images/:id', upload.array('image_paths', 5), TourismEntitiesImagesController.updateImages);
-router.delete('/place/images/:id', TourismEntitiesImagesController.deleteImage);
+router.get('/images', TourismEntitiesImagesController.getAllImages);
+router.get('/images/:id', TourismEntitiesImagesController.getImageById);
+router.post('/images', upload.array('image_paths', 5), TourismEntitiesImagesController.createImage);
+router.put('/images/:id', upload.array('image_paths', 5), TourismEntitiesImagesController.updateImages);
+router.delete('/images/:id', TourismEntitiesImagesController.deleteImage);
 // router.post('/place', upload.single('image_path'), TourismEntitiesImagesController.createImage);
 // router.post('/place', TourismEntitiesImagesController.createImage);
 // router.put('/place/:id', TourismEntitiesImagesController.updateImage);

@@ -32,15 +32,44 @@ const getAllDistricts = async () => {
     return result.affectedRows;
   };
 
+// const getTouristEntitiesByDistrict = async (districtId) => {
+//   const query = `
+//   SELECT
+//       te.id,
+//       te.name,
+//       te.description,
+//       te.location,
+//       te.latitude,
+//       te.longitude,
+//       d.name AS district_name,
+//       c.name AS category_name,
+//       GROUP_CONCAT(DISTINCT ti.image_path) AS images,
+//       GROUP_CONCAT(DISTINCT s.name) AS seasons
+//   FROM
+//       tourist_entities te
+//   INNER JOIN
+//       district d ON te.district_id = d.id
+//   INNER JOIN
+//       categories c ON te.category_id = c.id
+//   LEFT JOIN
+//       tourism_entities_images ti ON te.id = ti.tourism_entities_id
+//   LEFT JOIN
+//       seasons_relation sr ON te.id = sr.tourism_entities_id
+//   LEFT JOIN
+//       seasons s ON sr.season_id = s.id
+//   WHERE
+//       te.district_id = ?
+//   GROUP BY
+//       te.id;
+// `;
+//   const [rows] = await pool.query(query, [districtId]);
+//   return rows;
+// };
+
 const getTouristEntitiesByDistrict = async (districtId) => {
   const query = `
   SELECT
-      te.id,
-      te.name,
-      te.description,
-      te.location,
-      te.latitude,
-      te.longitude,
+      te.*,
       d.name AS district_name,
       c.name AS category_name,
       GROUP_CONCAT(DISTINCT ti.image_path) AS images,
@@ -61,10 +90,21 @@ const getTouristEntitiesByDistrict = async (districtId) => {
       te.district_id = ?
   GROUP BY
       te.id;
-`;
+  `;
   const [rows] = await pool.query(query, [districtId]);
+  if (rows.length) {
+    rows.forEach(row => {
+      if (row.images) {
+        row.images = row.images.split(',').map(imagePath => ({
+          image_path: imagePath,
+          image_url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${imagePath}`
+        }));
+      }
+    });
+  }
   return rows;
 };
+
 
 // DistrictModel.js
 const getIdByName = async (name) => {

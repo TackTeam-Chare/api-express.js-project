@@ -194,6 +194,17 @@ const deleteTouristEntity = async (req, res) => {
     }
 };
 
+const searchTouristEntities = async (req, res) => {
+  const { q } = req.query;
+  try {
+    const results = await TouristModel.search(q);
+    res.json(results);
+  } catch (error) {
+    console.error('Error searching tourist entities:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export default {
     getAllTouristEntities,
     getTouristEntityById,
@@ -203,4 +214,5 @@ export default {
     createTouristEntity,
     updateTouristEntity,
     deleteTouristEntity,
+    searchTouristEntities
 };
