@@ -79,20 +79,20 @@ const getOperatingHoursById = async (req, res) => {
 
 const getTouristEntitiesByTime = async (req, res) => {
     try {
-        const { day_of_week, opening_time, closing_time } = req.query;
-        console.log('Request parameters:', day_of_week, opening_time, closing_time); // แสดงค่าพารามิเตอร์ที่ส่งมาใน request
+      const { day_of_week, opening_time, closing_time } = req.params;
+      console.log('Request parameters:', day_of_week, opening_time, closing_time);
 
-        const entities = await TimeModel.getTouristEntitiesByTime(day_of_week, opening_time, closing_time);
-        console.log('Entities fetched:', entities); // แสดงข้อมูลที่ได้รับกลับมาจากฟังก์ชัน getTouristEntitiesByTime
+      const entities = await TimeModel.getTouristEntitiesByTime(day_of_week, opening_time, closing_time);
+      console.log('Entities fetched:', entities);
 
-        res.json(entities);
+      res.json(entities);
     } catch (error) {
-        console.error('Error fetching tourist entities by time:', error);
-        res.status(500).json({
-            error: 'Internal server error'
-        });
+      console.error('Error fetching tourist entities by time:', error);
+      res.status(500).json({
+        error: 'Internal server error'
+      });
     }
-};
+  };
 
 
 export default {

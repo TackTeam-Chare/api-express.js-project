@@ -63,7 +63,7 @@ const getTouristEntityById = async (id) => {
         te.*, 
         c.name AS category_name, 
         d.name AS district_name, 
-        GROUP_CONCAT(ti.image_path) AS images
+        GROUP_CONCAT(ti.image_path) AS image_url
       FROM 
         tourist_entities te
       JOIN 
@@ -78,16 +78,7 @@ const getTouristEntityById = async (id) => {
         te.id
     `;
     const [rows] = await pool.query(searchQuery, [`%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`]);
-    if (rows.length) {
-      rows.forEach(row => {
-        if (row.images) {
-          row.images = row.images.split(',').map(imagePath => ({
-            image_path: imagePath,
-            image_url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${imagePath}`
-          }));
-        }
-      });
-    }
+   
     return rows;
   };
 
