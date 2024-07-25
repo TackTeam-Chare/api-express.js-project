@@ -1,9 +1,12 @@
-import TourismEntitiesImagesModel from '../../models/auth/TourismEntitiesImages.js';
+import pool from '../../config/db.js';
+
+// Controller functions with integrated model code
 
 // ดึงภาพทั้งหมด
 const getAllImages = async (req, res) => {
     try {
-        const images = await TourismEntitiesImagesModel.getAllImages();
+        const query = 'SELECT * FROM tourism_entities_images';
+        const [images] = await pool.query(query);
         console.log('All Images:', images);
         res.json(images);
     } catch (error) {
@@ -16,7 +19,9 @@ const getAllImages = async (req, res) => {
 const getImageById = async (req, res) => {
     try {
         const id = req.params.id;
-        const image = await TourismEntitiesImagesModel.getImageById(id);
+        const query = 'SELECT * FROM tourism_entities_images WHERE id = ?';
+        const [rows] = await pool.query(query, [id]);
+        const image = rows[0];
         console.log(`Image with ID ${id}:`, image);
         if (image) {
             res.json(image);
@@ -37,8 +42,13 @@ const createImage = async (req, res) => {
             image_path: file.filename
         }));
 
-        const insertIds = await TourismEntitiesImagesModel.create(images);
-        console.log('Created Images IDs:', insertIds);
+        const insertIds = [];
+        for (const image of images) {
+            const query = 'INSERT INTO tourism_entities_images SET ?';
+            const [result] = await pool.query(query, image);
+            insertIds.push(result.insertId);
+            console.log('Insert Image:', image, 'Insert ID:', result.insertId);
+        }
 
         res.json({
             message: 'Images uploaded successfully',
@@ -62,10 +72,16 @@ const updateImages = async (req, res) => {
             return res.status(404).json({ error: 'Tourist entity not found' });
         }
 
-        const affectedRows = await TourismEntitiesImagesModel.update(id, imagePaths);
-        console.log('Updated Rows:', affectedRows);
+        const deleteQuery = 'DELETE FROM tourism_entities_images WHERE tourism_entities_id = ?';
+        await pool.query(deleteQuery, [id]);
+        console.log(`Deleted Images for Entity ID ${id}`);
 
-        if (affectedRows > 0) {
+        const insertQuery = 'INSERT INTO tourism_entities_images (tourism_entities_id, image_path, created_at) VALUES ?';
+        const values = imagePaths.map(imagePath => [id, imagePath, new Date()]);
+        const [result] = await pool.query(insertQuery, [values]);
+        console.log('Inserted Images:', values, 'Affected Rows:', result.affectedRows);
+
+        if (result.affectedRows > 0) {
             res.json({ message: `Images for entity with ID ${id} updated successfully` });
         } else {
             res.status(404).json({ error: 'Entity not found or no images updated' });
@@ -79,9 +95,10 @@ const updateImages = async (req, res) => {
 const deleteImage = async (req, res) => {
     const id = req.params.id;
     try {
-        const affectedRows = await TourismEntitiesImagesModel.remove(id);
-        console.log('Deleted Rows:', affectedRows);
-        if (affectedRows > 0) {
+        const query = 'DELETE FROM tourism_entities_images WHERE id = ?';
+        const [result] = await pool.query(query, [id]);
+        console.log(`Deleted Image by ID ${id}:`, result.affectedRows);
+        if (result.affectedRows > 0) {
             res.json({ message: `Image with ID ${id} deleted successfully` });
         } else {
             res.status(404).json({ error: 'Image not found' });

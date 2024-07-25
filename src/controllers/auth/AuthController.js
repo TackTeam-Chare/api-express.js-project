@@ -2,11 +2,44 @@ import pool from '../../config/db.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import AdminModel from '../../models/auth/Admin.js';
 
 dotenv.config();
 
-const createAdmin = async (req, res) => {
+// Model functions
+
+const getAllAdmins = async () => {
+  const query = 'SELECT * FROM admin';
+  const [rows] = await pool.query(query);
+  return rows;
+};
+
+const getAdminById = async (id) => {
+  const query = 'SELECT * FROM admin WHERE id = ?';
+  const [rows] = await pool.query(query, [id]);
+  return rows[0];
+};
+
+const createAdmin = async (admin) => {
+  const query = 'INSERT INTO admin SET ?';
+  const [result] = await pool.query(query, admin);
+  return result.insertId;
+};
+
+const updateAdmin = async (id, admin) => {
+  const query = 'UPDATE admin SET ? WHERE id = ?';
+  const [result] = await pool.query(query, [admin, id]);
+  return result.affectedRows;
+};
+
+const removeAdmin = async (id) => {
+  const query = 'DELETE FROM admin WHERE id = ?';
+  const [result] = await pool.query(query, [id]);
+  return result.affectedRows;
+};
+
+// Controller functions
+
+const createAdminHandler = async (req, res) => {
     const { username, password, name } = req.body;
     try {
         const [existingAdmin] = await pool.query('SELECT * FROM admin WHERE username = ?', [username]);
@@ -15,10 +48,12 @@ const createAdmin = async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const [result] = await pool.query('INSERT INTO admin (username, password, name) VALUES (?, ?, ?)', [username, hashedPassword, name]);
-        const token = jwt.sign({ id: result.insertId, username }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        await storeToken(result.insertId, token);
-        res.json({ message: 'Admin created successfully', id: result.insertId, token });
+        const admin = { username, password: hashedPassword, name };
+        const insertId = await createAdmin(admin);
+
+        const token = jwt.sign({ id: insertId, username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        await storeToken(insertId, token);
+        res.json({ message: 'Admin created successfully', id: insertId, token });
     } catch (error) {
         console.error('Error creating admin:', error);
         res.status(500).json({ error: error.message });
@@ -37,7 +72,7 @@ const storeToken = async (adminId, token) => {
     }
 };
 
-const login = async (req, res) => {
+const loginHandler = async (req, res) => {
     const { username, password } = req.body;
     try {
         const [rows] = await pool.query('SELECT * FROM admin WHERE username = ?', [username]);
@@ -55,11 +90,10 @@ const login = async (req, res) => {
     }
 };
 
-const getProfile = async (req, res) => {
+const getProfileHandler = async (req, res) => {
     try {
         const adminId = req.user.id;
-        const [rows] = await pool.query('SELECT id, username, name FROM admin WHERE id = ?', [adminId]);
-        const admin = rows[0];
+        const admin = await getAdminById(adminId);
 
         if (admin) {
             res.json(admin);
@@ -71,19 +105,17 @@ const getProfile = async (req, res) => {
     }
 };
 
-const updateProfile = async (req, res) => {
+const updateProfileHandler = async (req, res) => {
     const { username, name, password } = req.body;
     const adminId = req.user.id;
 
     try {
-        // ดึงข้อมูลโปรไฟล์ปัจจุบัน
         const [currentProfile] = await pool.query('SELECT * FROM admin WHERE id = ?', [adminId]);
         const currentAdmin = currentProfile[0];
 
         let updates = [];
         let values = [];
 
-        // ตรวจสอบและเพิ่มการอัพเดทที่แตกต่างจากข้อมูลเดิม
         if (name && name !== currentAdmin.name) {
             updates.push('name = ?');
             values.push(name);
@@ -120,7 +152,7 @@ const updateProfile = async (req, res) => {
     }
 };
 
-const logout = async (req, res) => {
+const logoutHandler = async (req, res) => {
     const adminId = req.user.id;
     try {
         const token = req.header('Authorization')?.split(' ')[1];
@@ -135,19 +167,19 @@ const logout = async (req, res) => {
     }
 };
 
-const getAllAdmins = async (req, res) => {
+const getAllAdminsHandler = async (req, res) => {
     try {
-        const admins = await AdminModel.getAllAdmins();
+        const admins = await getAllAdmins();
         res.json(admins);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
 
-const getAdminById = async (req, res) => {
+const getAdminByIdHandler = async (req, res) => {
     try {
         const id = req.params.id;
-        const admin = await AdminModel.getAdminById(id);
+        const admin = await getAdminById(id);
         if (admin) {
             res.json(admin);
         } else {
@@ -158,11 +190,11 @@ const getAdminById = async (req, res) => {
     }
 };
 
-const updateAdmin = async (req, res) => {
+const updateAdminHandler = async (req, res) => {
     const id = req.params.id;
     const admin = req.body;
     try {
-        const affectedRows = await AdminModel.update(id, admin);
+        const affectedRows = await updateAdmin(id, admin);
         if (affectedRows > 0) {
             res.json({ message: `Admin with ID ${id} updated successfully` });
         } else {
@@ -173,10 +205,10 @@ const updateAdmin = async (req, res) => {
     }
 };
 
-const deleteAdmin = async (req, res) => {
+const deleteAdminHandler = async (req, res) => {
     const id = req.params.id;
     try {
-        const affectedRows = await AdminModel.remove(id);
+        const affectedRows = await removeAdmin(id);
         if (affectedRows > 0) {
             res.json({ message: `Admin with ID ${id} deleted successfully` });
         } else {
@@ -187,7 +219,7 @@ const deleteAdmin = async (req, res) => {
     }
 };
 
-const verifyPassword = async (req, res) => {
+const verifyPasswordHandler = async (req, res) => {
     const { username, password } = req.body;
     try {
         const [rows] = await pool.query('SELECT * FROM admin WHERE username = ?', [username]);
@@ -204,15 +236,15 @@ const verifyPassword = async (req, res) => {
 };
 
 export default {
-    getAllAdmins,
-    getAdminById,
-    createAdmin,
-    updateAdmin,
-    deleteAdmin,
+    getAllAdminsHandler,
+    getAdminByIdHandler,
+    createAdminHandler,
+    updateAdminHandler,
+    deleteAdminHandler,
     storeToken,
-    login,
-    verifyPassword,
-    getProfile,
-    updateProfile,
-    logout
+    loginHandler,
+    verifyPasswordHandler,
+    getProfileHandler,
+    updateProfileHandler,
+    logoutHandler
 };

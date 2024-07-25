@@ -1,8 +1,11 @@
-import TimeModel from '../../models/user/Time.js';
+import pool from '../../config/db.js';
+
+// Controller functions with integrated model code
 
 const getAllOperatingHours = async (req, res) => {
     try {
-        const operatingHours = await TimeModel.getAllOperatingHours();
+        const query = 'SELECT * FROM operating_hours';
+        const [operatingHours] = await pool.query(query);
         res.json(operatingHours);
     } catch (error) {
         console.error('Error fetching operating hours:', error);
@@ -15,9 +18,15 @@ const getAllOperatingHours = async (req, res) => {
 const getOperatingHoursById = async (req, res) => {
     try {
         const id = req.params.id;
-        const operatingHours = await TimeModel.getOperatingHoursById(id);
+        const query = `
+            SELECT *
+            FROM operating_hours
+            WHERE place_id = ?
+        `;
+        const [rows] = await pool.query(query, [id]);
+        const operatingHours = rows;
 
-        if (operatingHours) {
+        if (operatingHours.length > 0) {
             res.json(operatingHours);
         } else {
             res.status(404).json({
@@ -31,15 +40,54 @@ const getOperatingHoursById = async (req, res) => {
         });
     }
 };
+
 const getTouristEntitiesByTime = async (req, res) => {
     try {
         const { day_of_week, opening_time, closing_time } = req.query;
-        console.log('Request parameters:', day_of_week, opening_time, closing_time); // แสดงค่าพารามิเตอร์ที่ส่งมาใน request
+        console.log('Request parameters:', day_of_week, opening_time, closing_time);
 
-        const entities = await TimeModel.getTouristEntitiesByTime(day_of_week, opening_time, closing_time);
-        console.log('Entities fetched:', entities); // แสดงข้อมูลที่ได้รับกลับมาจากฟังก์ชัน getTouristEntitiesByTime
+        let query = `
+            SELECT 
+                te.*,
+                d.name AS district_name,
+                GROUP_CONCAT(
+                    DISTINCT CONCAT(
+                        oh.day_of_week, ': ', 
+                        TIME_FORMAT(oh.opening_time, '%h:%i %p'), ' - ', 
+                        TIME_FORMAT(oh.closing_time, '%h:%i %p')
+                    ) ORDER BY oh.day_of_week SEPARATOR '\n'
+                ) AS operating_hours,
+                (SELECT image_path FROM tourism_entities_images WHERE tourism_entities_id = te.id LIMIT 1) AS image_url
+            FROM
+                tourist_entities te
+                JOIN district d ON te.district_id = d.id
+                LEFT JOIN operating_hours oh ON te.id = oh.place_id
+            WHERE
+                1 = 1
+        `;
 
-        res.json(entities);
+        const params = [];
+        if (day_of_week && opening_time && closing_time) {
+            query += `
+                AND oh.day_of_week = ?
+                AND oh.opening_time <= ?
+                AND oh.closing_time >= ?
+            `;
+            params.push(day_of_week, opening_time, closing_time);
+        }
+
+        query += `
+            GROUP BY 
+                te.id
+        `;
+
+        console.log('Generated SQL query:', query);
+        console.log('Parameters:', params);
+
+        const [rows] = await pool.query(query, params);
+        console.log('Fetched rows from database:', rows);
+
+        res.json(rows);
     } catch (error) {
         console.error('Error fetching tourist entities by time:', error);
         res.status(500).json({
@@ -47,7 +95,6 @@ const getTouristEntitiesByTime = async (req, res) => {
         });
     }
 };
-
 
 export default {
     getAllOperatingHours,

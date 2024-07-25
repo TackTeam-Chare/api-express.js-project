@@ -1,8 +1,11 @@
-import DistrictModel from '../../models/user/District.js';
+import pool from '../../config/db.js';
+
+// Controller functions with integrated model code
 
 const getAllDistricts = async (req, res) => {
     try {
-        const districts = await DistrictModel.getAllDistricts();
+        const query = 'SELECT * FROM district';
+        const [districts] = await pool.query(query);
         res.json(districts);
     } catch (error) {
         console.error('Error fetching districts:', error);
@@ -12,11 +15,13 @@ const getAllDistricts = async (req, res) => {
     }
 };
 
-// Get district by ID
 const getDistrictById = async (req, res) => {
     try {
         const id = req.params.id;
-        const district = await DistrictModel.getDistrictById(id);
+        const query = 'SELECT * FROM district WHERE id = ?';
+        const [rows] = await pool.query(query, [id]);
+        const district = rows[0];
+
         if (district) {
             res.json(district);
         } else {
@@ -27,12 +32,40 @@ const getDistrictById = async (req, res) => {
     }
 };
 
-
 const getTouristEntitiesByDistrict = async (req, res) => {
     try {
-        const id = req.params.id;
-        const entities = await DistrictModel.getTouristEntitiesByDistrict(id);
-        res.json(entities);
+        const districtId = req.params.id;
+        const query = `
+            SELECT
+                te.id,
+                te.name,
+                te.description,
+                te.location,
+                te.latitude,
+                te.longitude,
+                d.name AS district_name,
+                c.name AS category_name,
+                GROUP_CONCAT(DISTINCT ti.image_path) AS images,
+                GROUP_CONCAT(DISTINCT s.name) AS seasons
+            FROM
+                tourist_entities te
+            INNER JOIN
+                district d ON te.district_id = d.id
+            INNER JOIN
+                categories c ON te.category_id = c.id
+            LEFT JOIN
+                tourism_entities_images ti ON te.id = ti.tourism_entities_id
+            LEFT JOIN
+                seasons_relation sr ON te.id = sr.tourism_entities_id
+            LEFT JOIN
+                seasons s ON sr.season_id = s.id
+            WHERE
+                te.district_id = ?
+            GROUP BY
+                te.id;
+        `;
+        const [rows] = await pool.query(query, [districtId]);
+        res.json(rows);
     } catch (error) {
         console.error('Error fetching tourist entities by district:', error);
         res.status(500).json({
@@ -44,5 +77,5 @@ const getTouristEntitiesByDistrict = async (req, res) => {
 export default {
     getAllDistricts,
     getDistrictById,
-    getTouristEntitiesByDistrict,
+    getTouristEntitiesByDistrict
 };
