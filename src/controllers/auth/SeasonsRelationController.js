@@ -33,10 +33,20 @@ const getSeasonsRelationById = async (req, res) => {
 
 // Create a new seasons_relation
 const createSeasonsRelation = async (req, res) => {
-    const relation = req.body;
+    const { season_id, tourism_entities_id } = req.body;
     try {
-        const query = 'INSERT INTO seasons_relation SET ?';
-        const [result] = await pool.query(query, relation);
+        // ตรวจสอบว่ามีฤดูกาลและสถานที่ท่องเที่ยวนี้ในตารางอยู่แล้วหรือไม่
+        const checkQuery = 'SELECT * FROM seasons_relation WHERE season_id = ? AND tourism_entities_id = ?';
+        const [existingRelation] = await pool.query(checkQuery, [season_id, tourism_entities_id]);
+
+        if (existingRelation.length > 0) {
+            // หากมีอยู่แล้ว ส่งข้อความแจ้งกลับไป
+            return res.status(400).json({ error: 'This season and tourism entity relation already exists.' });
+        }
+
+        // ถ้าไม่มีอยู่แล้วทำการ insert ใหม่
+        const insertQuery = 'INSERT INTO seasons_relation SET ?';
+        const [result] = await pool.query(insertQuery, { season_id, tourism_entities_id });
         res.json({
             message: 'Relation created successfully',
             id: result.insertId
