@@ -90,30 +90,6 @@ const getTouristEntityById = async (req, res) => {
     }
 };
 
-const getTouristEntityDetailsById = async (id) => {
-    const query = `
-        SELECT 
-            te.*, 
-            c.name AS category_name, 
-            d.name AS district_name, 
-            GROUP_CONCAT(ti.image_path) AS images
-        FROM tourist_entities te
-        JOIN categories c ON te.category_id = c.id
-        JOIN district d ON te.district_id = d.id
-        LEFT JOIN tourism_entities_images ti ON te.id = ti.tourism_entities_id
-        WHERE te.id = ?
-        GROUP BY te.id
-    `;
-    const [rows] = await pool.query(query, [id]);
-    if (rows.length && rows[0].images) {
-        rows[0].images = rows[0].images.split(',').map(imagePath => ({
-            image_path: imagePath,
-            image_url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${imagePath}`
-        }));
-    }
-    return rows[0];
-};
-
 const getNearbyTouristEntitiesHandler = async (req, res) => {
     try {
         const id = req.params.id;
@@ -141,6 +117,30 @@ const getNearbyTouristEntitiesHandler = async (req, res) => {
             error: 'Internal server error'
         });
     }
+};
+
+const getTouristEntityDetailsById = async (id) => {
+    const query = `
+        SELECT 
+            te.*, 
+            c.name AS category_name, 
+            d.name AS district_name, 
+            GROUP_CONCAT(ti.image_path) AS images
+        FROM tourist_entities te
+        JOIN categories c ON te.category_id = c.id
+        JOIN district d ON te.district_id = d.id
+        LEFT JOIN tourism_entities_images ti ON te.id = ti.tourism_entities_id
+        WHERE te.id = ?
+        GROUP BY te.id
+    `;
+    const [rows] = await pool.query(query, [id]);
+    if (rows.length && rows[0].images) {
+        rows[0].images = rows[0].images.split(',').map(imagePath => ({
+            image_path: imagePath,
+            image_url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${imagePath}`
+        }));
+    }
+    return rows[0];
 };
 
 const getNearbyTouristEntities = async (latitude, longitude, distance, excludeId) => {
