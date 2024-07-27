@@ -1,8 +1,40 @@
 import pool from '../../config/db.js';
 
-// Controller functions with integrated model code
+const searchTouristEntities = async (req, res) => {
+    const { q } = req.query;
+    try {
+        const results = await search(q);
+        res.json(results);
+    } catch (error) {
+        console.error('Error searching tourist entities:', error);
+        res.status(500).json({ error: error.message });
+    }
+};
 
-//  ดึงสถานที่ทั้งหมดในฐานข้อมูล
+const search = async (query) => {
+    const searchQuery = `
+        SELECT 
+            te.*, 
+            c.name AS category_name, 
+            d.name AS district_name, 
+            GROUP_CONCAT(ti.image_path) AS image_url
+        FROM 
+            tourist_entities te
+        JOIN 
+            categories c ON te.category_id = c.id
+        JOIN 
+            district d ON te.district_id = d.id
+        LEFT JOIN 
+            tourism_entities_images ti ON te.id = ti.tourism_entities_id
+        WHERE 
+            te.name LIKE ? OR te.description LIKE ? OR c.name LIKE ? OR d.name LIKE ?
+        GROUP BY 
+            te.id
+    `;
+    const [rows] = await pool.query(searchQuery, [`%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`]);
+   
+    return rows;
+};
 const getAllTouristEntities = async (req, res) => {
     try {
         const query = `
@@ -151,6 +183,8 @@ const getNearbyTouristEntities = async (latitude, longitude, distance, excludeId
 };
 
 export default {
+    searchTouristEntities,
+    search,
     getAllTouristEntities,
     getTouristEntityById,
     getNearbyTouristEntitiesHandler,

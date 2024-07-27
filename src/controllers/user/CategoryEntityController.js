@@ -1,18 +1,10 @@
 import pool from '../../config/db.js';
 
-// Controller functions with integrated model code
 const getAllCategories = async (req, res) => {
     try {
-        const query = `SELECT * FROM categories`;
+        const query = 'SELECT * FROM categories';
         const [categories] = await pool.query(query);
-
-        if (categories && categories.length > 0) {
-            res.json(categories);
-        } else {
-            res.status(404).json({
-                error: 'Tourist entity not found'
-            });
-        }
+        res.json(categories);
     } catch (error) {
         console.error('Error fetching categories:', error);
         res.status(500).json({
@@ -45,13 +37,12 @@ const getCategoryById = async (req, res) => {
 
 const getTouristEntitiesByCategory = async (req, res) => {
     try {
-        const categoryId = req.params.id;
-
+        const id = req.params.id;
         const query = `
             SELECT 
                 te.*, 
                 c.name AS category_name,
-                GROUP_CONCAT(DISTINCT tei.image_path) AS images,
+                GROUP_CONCAT(DISTINCT tei.image_path) AS image_url,
                 GROUP_CONCAT(DISTINCT s.name ORDER BY s.date_start) AS seasons
             FROM 
                 tourist_entities te
@@ -65,7 +56,6 @@ const getTouristEntitiesByCategory = async (req, res) => {
                 te.id
         `;
 
-        // Query to fetch operating hours
         const hoursQuery = `
             SELECT 
                 oh.place_id, 
@@ -79,11 +69,9 @@ const getTouristEntitiesByCategory = async (req, res) => {
                 te.category_id = ?
         `;
 
-        // Run both queries
-        const [rows] = await pool.query(query, [categoryId]);
-        const [hoursRows] = await pool.query(hoursQuery, [categoryId]);
+        const [rows] = await pool.query(query, [id]);
+        const [hoursRows] = await pool.query(hoursQuery, [id]);
 
-        // Combine operating hours with main data
         rows.forEach(row => {
             row.operating_hours = hoursRows.filter(hour => hour.place_id === row.id);
         });
@@ -97,8 +85,11 @@ const getTouristEntitiesByCategory = async (req, res) => {
     }
 };
 
+
+
 export default {
     getAllCategories,
     getCategoryById,
     getTouristEntitiesByCategory,
 };
+

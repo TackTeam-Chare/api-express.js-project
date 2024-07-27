@@ -7,13 +7,15 @@ import CategoryEntityController from '../../controllers/user/CategoryEntityContr
 const router = express.Router();
 
 // User
+router.get('/search', TouristEntityController.searchTouristEntities);
+
 router.get('/place', TouristEntityController.getAllTouristEntities);
 router.get('/place/:id', TouristEntityController.getTouristEntityById);
 router.get('/place/nearby/:id', TouristEntityController.getNearbyTouristEntitiesHandler);
 
-router.get('/operating-hours', OperatingHoursEntityController.getAllOperatingHours);
-router.get('/operating-hours/:id', OperatingHoursEntityController.getOperatingHoursById);
-router.get('/operating-hours/:day_of_week/:opening_time/:closing_time', OperatingHoursEntityController.getTouristEntitiesByTime);
+router.get('/time', OperatingHoursEntityController.getAllOperatingHours);
+router.get('/time/:id', OperatingHoursEntityController.getOperatingHoursById);
+router.get('/time/:day_of_week/:opening_time/:closing_time', OperatingHoursEntityController.getTouristEntitiesByTime);
 
 router.get('/seasons', SeasonEntityController.getAllSeasons);
 router.get('/seasons/:id', SeasonEntityController.getSeasonById);

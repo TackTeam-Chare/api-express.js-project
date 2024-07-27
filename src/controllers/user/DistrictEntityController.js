@@ -1,7 +1,5 @@
 import pool from '../../config/db.js';
 
-// Controller functions with integrated model code
-
 const getAllDistricts = async (req, res) => {
     try {
         const query = 'SELECT * FROM district';
@@ -34,7 +32,7 @@ const getDistrictById = async (req, res) => {
 
 const getTouristEntitiesByDistrict = async (req, res) => {
     try {
-        const districtId = req.params.id;
+        const id = req.params.id;
         const query = `
             SELECT
                 te.id,
@@ -45,7 +43,7 @@ const getTouristEntitiesByDistrict = async (req, res) => {
                 te.longitude,
                 d.name AS district_name,
                 c.name AS category_name,
-                GROUP_CONCAT(DISTINCT ti.image_path) AS images,
+                GROUP_CONCAT(DISTINCT ti.image_path) AS image_url,
                 GROUP_CONCAT(DISTINCT s.name) AS seasons
             FROM
                 tourist_entities te
@@ -64,13 +62,22 @@ const getTouristEntitiesByDistrict = async (req, res) => {
             GROUP BY
                 te.id;
         `;
-        const [rows] = await pool.query(query, [districtId]);
+        const [rows] = await pool.query(query, [id]);
         res.json(rows);
     } catch (error) {
         console.error('Error fetching tourist entities by district:', error);
         res.status(500).json({
             error: 'Internal server error'
         });
+    }
+};
+
+const getIdByName = async (name) => {
+    const [rows] = await pool.query('SELECT id FROM district WHERE name = ?', [name]);
+    if (rows.length > 0) {
+        return rows[0].id;
+    } else {
+        throw new Error(`District '${name}' not found`);
     }
 };
 

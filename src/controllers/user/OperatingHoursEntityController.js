@@ -18,15 +18,11 @@ const getAllOperatingHours = async (req, res) => {
 const getOperatingHoursById = async (req, res) => {
     try {
         const id = req.params.id;
-        const query = `
-            SELECT *
-            FROM operating_hours
-            WHERE place_id = ?
-        `;
+        const query = 'SELECT * FROM operating_hours WHERE id = ?';
         const [rows] = await pool.query(query, [id]);
-        const operatingHours = rows;
+        const operatingHours = rows[0];
 
-        if (operatingHours.length > 0) {
+        if (operatingHours) {
             res.json(operatingHours);
         } else {
             res.status(404).json({
@@ -43,7 +39,7 @@ const getOperatingHoursById = async (req, res) => {
 
 const getTouristEntitiesByTime = async (req, res) => {
     try {
-        const { day_of_week, opening_time, closing_time } = req.query;
+        const { day_of_week, opening_time, closing_time } = req.params;
         console.log('Request parameters:', day_of_week, opening_time, closing_time);
 
         let query = `
@@ -65,7 +61,6 @@ const getTouristEntitiesByTime = async (req, res) => {
             WHERE
                 1 = 1
         `;
-
         const params = [];
         if (day_of_week && opening_time && closing_time) {
             query += `
@@ -75,17 +70,12 @@ const getTouristEntitiesByTime = async (req, res) => {
             `;
             params.push(day_of_week, opening_time, closing_time);
         }
-
         query += `
             GROUP BY 
                 te.id
         `;
-
-        console.log('Generated SQL query:', query);
-        console.log('Parameters:', params);
-
         const [rows] = await pool.query(query, params);
-        console.log('Fetched rows from database:', rows);
+        console.log('Entities fetched:', rows);
 
         res.json(rows);
     } catch (error) {

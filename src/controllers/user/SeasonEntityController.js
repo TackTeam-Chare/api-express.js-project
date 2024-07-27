@@ -15,6 +15,7 @@ const getAllSeasons = async (req, res) => {
     }
 };
 
+// Get season by ID
 const getSeasonById = async (req, res) => {
     try {
         const id = req.params.id;
@@ -39,7 +40,7 @@ const getTouristEntitiesBySeason = async (req, res) => {
             SELECT
                 te.*,
                 s.name AS season_name, 
-                ti.image_path,
+                ti.image_path AS image_url,
                 d.name AS district_name,
                 GROUP_CONCAT(
                     DISTINCT CONCAT(
