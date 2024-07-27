@@ -18,6 +18,7 @@ router.get('/time/:id', OperatingHoursEntityController.getOperatingHoursById);
 router.get('/time/:day_of_week/:opening_time/:closing_time', OperatingHoursEntityController.getTouristEntitiesByTime);
 
 router.get('/seasons', SeasonEntityController.getAllSeasons);
+router.get('/seasons/real-time', SeasonEntityController.getTouristEntitiesBySeasonRealTime);
 router.get('/seasons/:id', SeasonEntityController.getSeasonById);
 router.get('/seasons/:id/place', SeasonEntityController.getTouristEntitiesBySeason);
 

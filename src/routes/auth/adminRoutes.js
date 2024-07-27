@@ -48,6 +48,7 @@ router.delete('/time/:id', OperatingHoursEntityController.deleteOperatingHours);
 
 // Seasons
 router.get('/seasons', SeasonEntityController.getAllSeasons); // ดึงข้อมูลฤดูกาลทั้งหมด
+router.get('/seasons/real-time', SeasonEntityController.getTouristEntitiesBySeasonRealTime);
 router.get('/seasons/:id', SeasonEntityController.getSeasonById); // ดึงข้อมูลสถานที่ท่องเที่ยวตามฤดูกาล
 router.get('/seasons/:id/place', SeasonEntityController.getTouristEntitiesBySeason); // ดึงข้อมูลสถานที่ท่องเที่ยวตามฤดูกาล
 router.post('/seasons', SeasonEntityController.createSeason); // เพิ่มฤดูกาลใหม่
