@@ -16,7 +16,7 @@ router.get('/search', TouristEntityController.searchTouristEntities);
 // Tourist Entities
 router.get('/place', TouristEntityController.getAllTouristEntities); // ดึงข้อมูลตารางสถานที่ทั้งหมด
 router.get('/place/:id', TouristEntityController.getTouristEntityById); // ดึงข้อมูลตารางสถานที่ด้วยไอดี
-router.get('/place/:id/nearby', TouristEntityController.getNearbyTouristEntitiesHandler); // ดึงข้อมูลตารางสถานที่ด้วยไอดีและสถานที่ใกล้เคียง
+router.get('/place/nearby/:id', TouristEntityController.getNearbyTouristEntitiesHandler); // ดึงข้อมูลตารางสถานที่ด้วยไอดีและสถานที่ใกล้เคียง
 router.post('/place', upload.single('image_paths'), TouristEntityController.createTouristEntity);
 router.put('/place/:id', upload.single('image_paths'), TouristEntityController.updateTouristEntity);
 // router.post('/place', upload.array('image_paths', 5), TouristEntityController.createTouristEntity);
