@@ -24,6 +24,7 @@ const getImageById = async (req, res) => {
         const image = rows[0];
         console.log(`Image with ID ${id}:`, image);
         if (image) {
+            image.image_url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${image.image_path}`;
             res.json(image);
         } else {
             res.status(404).json({ error: 'Image not found' });
@@ -34,7 +35,8 @@ const getImageById = async (req, res) => {
     }
 };
 
-// สร้างภาพใหม่
+
+
 // สร้างภาพใหม่
 const createImage = async (req, res) => {
     try {
@@ -59,6 +61,7 @@ const createImage = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 // อัพเดทภาพที่มีอยู่เดิม
 const updateImages = async (req, res) => {
@@ -86,7 +89,6 @@ const updateImages = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
-
 
 // const createImage = async (req, res) => {
 //     try {

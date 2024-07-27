@@ -100,10 +100,10 @@ const getTouristEntityById = async (req, res) => {
 const getNearbyTouristEntitiesHandler = async (req, res) => {
     try {
         const id = req.params.id;
-        let { radius = 1500 } = req.query;
+        let { radius = 5000 } = req.query;
         radius = parseInt(radius, 10);
         if (isNaN(radius) || radius <= 0) {
-            radius = 1500;
+            radius = 5000;
         }
         const entity = await getTouristEntityDetailsById(id);
         if (!entity) {
