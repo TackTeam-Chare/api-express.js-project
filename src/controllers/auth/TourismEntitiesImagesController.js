@@ -34,31 +34,114 @@ const getImageById = async (req, res) => {
     }
 };
 
+// สร้างภาพใหม่
+// สร้างภาพใหม่
 const createImage = async (req, res) => {
     try {
         const tourism_entities_id = req.body.tourism_entities_id;
-        const images = req.files.map(file => ({
-            tourism_entities_id: tourism_entities_id,
-            image_path: file.filename
-        }));
+        const image_path = req.file.filename;
 
-        const insertIds = [];
-        for (const image of images) {
-            const query = 'INSERT INTO tourism_entities_images SET ?';
-            const [result] = await pool.query(query, image);
-            insertIds.push(result.insertId);
-            console.log('Insert Image:', image, 'Insert ID:', result.insertId);
+        // ตรวจสอบว่ามีรูปภาพสำหรับ tourism_entities_id นี้อยู่แล้วหรือไม่
+        const [existingImages] = await pool.query('SELECT id FROM tourism_entities_images WHERE tourism_entities_id = ?', [tourism_entities_id]);
+        if (existingImages.length > 0) {
+            return res.status(400).json({ error: 'Image already exists for this tourism entity' });
         }
 
+        const query = 'INSERT INTO tourism_entities_images (tourism_entities_id, image_path) VALUES (?, ?)';
+        const [result] = await pool.query(query, [tourism_entities_id, image_path]);
+
         res.json({
-            message: 'Images uploaded successfully',
-            ids: insertIds
+            message: 'Image uploaded successfully',
+            id: result.insertId
         });
     } catch (error) {
-        console.error('Error creating images:', error);
+        console.error('Error creating image:', error);
         res.status(500).json({ error: error.message });
     }
 };
+
+// อัพเดทภาพที่มีอยู่เดิม
+const updateImages = async (req, res) => {
+    const id = req.params.id;
+    const image_path = req.file.filename;
+
+    try {
+        // ตรวจสอบว่า entity ของนักท่องเที่ยวมีอยู่หรือไม่
+        const [entity] = await pool.query('SELECT id FROM tourism_entities_images WHERE id = ?', [id]);
+        console.log('Tourist Entity:', entity);
+
+        if (entity.length === 0) {
+            return res.status(404).json({ error: 'Tourist entity not found' });
+        }
+
+        // อัพเดทภาพที่มีอยู่เดิมสำหรับ tourist entity
+        const updateQuery = 'UPDATE tourism_entities_images SET image_path = ?, created_at = ? WHERE id = ?';
+        const values = [image_path, new Date(), id];
+        const [result] = await pool.query(updateQuery, values);
+        console.log('Updated Image:', values, 'Affected Rows:', result.affectedRows);
+
+        res.json({ message: `Images for entity with ID ${id} updated successfully` });
+    } catch (error) {
+        console.error('Error updating images:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+// const createImage = async (req, res) => {
+//     try {
+//         const tourism_entities_id = req.body.tourism_entities_id;
+//         const images = req.files.map(file => ({
+//             tourism_entities_id: tourism_entities_id,
+//             image_path: file.filename
+//         }));
+
+//         const insertIds = [];
+//         for (const image of images) {
+//             const query = 'INSERT INTO tourism_entities_images SET ?';
+//             const [result] = await pool.query(query, image);
+//             insertIds.push(result.insertId);
+//             console.log('Insert Image:', image, 'Insert ID:', result.insertId);
+//         }
+
+//         res.json({
+//             message: 'Images uploaded successfully',
+//             ids: insertIds
+//         });
+//     } catch (error) {
+//         console.error('Error creating images:', error);
+//         res.status(500).json({ error: error.message });
+//     }
+// };
+
+
+// const updateImages = async (req, res) => {
+//     const id = req.params.id;
+//     const imagePaths = req.files.map(file => file.filename);
+
+//     try {
+//         // ตรวจสอบว่า entity ของนักท่องเที่ยวมีอยู่หรือไม่
+//         const [entity] = await pool.query('SELECT id FROM tourism_entities_images WHERE id = ?', [id]);
+//         console.log('Tourist Entity:', entity);
+
+//         if (entity.length === 0) {
+//             return res.status(404).json({ error: 'Tourist entity not found' });
+//         }
+
+//         // อัพเดทภาพที่มีอยู่เดิมสำหรับ tourist entity
+//         const updateQuery = 'UPDATE tourism_entities_images SET image_path = ?, created_at = ? WHERE id = ?';
+//         for (let i = 0; i < imagePaths.length; i++) {
+//             const values = [imagePaths[i], new Date(), id];
+//             const [result] = await pool.query(updateQuery, values);
+//             console.log('Updated Image:', values, 'Affected Rows:', result.affectedRows);
+//         }
+
+//         res.json({ message: `Images for entity with ID ${id} updated successfully` });
+//     } catch (error) {
+//         console.error('Error updating images:', error);
+//         res.status(500).json({ error: 'Internal server error' });
+//     }
+// };
 
 // const updateImages = async (req, res) => {
 //     const id = req.params.id;
@@ -96,33 +179,6 @@ const createImage = async (req, res) => {
 //     }
 // };
 
-const updateImages = async (req, res) => {
-    const id = req.params.id;
-    const imagePaths = req.files.map(file => file.filename);
-
-    try {
-        // ตรวจสอบว่า entity ของนักท่องเที่ยวมีอยู่หรือไม่
-        const [entity] = await pool.query('SELECT id FROM tourism_entities_images WHERE id = ?', [id]);
-        console.log('Tourist Entity:', entity);
-
-        if (entity.length === 0) {
-            return res.status(404).json({ error: 'Tourist entity not found' });
-        }
-
-        // อัพเดทภาพที่มีอยู่เดิมสำหรับ tourist entity
-        const updateQuery = 'UPDATE tourism_entities_images SET image_path = ?, created_at = ? WHERE id = ?';
-        for (let i = 0; i < imagePaths.length; i++) {
-            const values = [imagePaths[i], new Date(), id];
-            const [result] = await pool.query(updateQuery, values);
-            console.log('Updated Image:', values, 'Affected Rows:', result.affectedRows);
-        }
-
-        res.json({ message: `Images for entity with ID ${id} updated successfully` });
-    } catch (error) {
-        console.error('Error updating images:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-};
 
 const deleteImage = async (req, res) => {
     const id = req.params.id;

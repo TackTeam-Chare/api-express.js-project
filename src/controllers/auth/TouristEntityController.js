@@ -117,70 +117,137 @@ const getNearbyTouristEntitiesHandler = async (req, res) => {
     }
 };
 
-const createTouristEntity = async (req, res) => {
-    const touristEntity = req.body;
-    const imagePaths = req.files.map(file => `${file.filename}`);
-    const { district_name, category_name } = touristEntity;
+// const createTouristEntity = async (req, res) => {
+//     const touristEntity = req.body;
+//     const imagePaths = req.files.map(file => `${file.filename}`);
+//     const { district_name, category_name } = touristEntity;
 
-    console.log('Received Data:', touristEntity);
-    console.log('Image Paths:', imagePaths);
+//     console.log('Received Data:', touristEntity);
+//     console.log('Image Paths:', imagePaths);
 
-    try {
-        const districtId = await District.getIdByName(district_name);
-        const categoryId = await Category.getIdByName(category_name);
+//     try {
+//         const districtId = await District.getIdByName(district_name);
+//         const categoryId = await Category.getIdByName(category_name);
 
-        touristEntity.district_id = districtId;
-        touristEntity.category_id = categoryId;
-        touristEntity.created_by = req.user.id;
+//         touristEntity.district_id = districtId;
+//         touristEntity.category_id = categoryId;
+//         touristEntity.created_by = req.user.id;
 
-        console.log('Tourist Entity to be Inserted:', touristEntity);
+//         console.log('Tourist Entity to be Inserted:', touristEntity);
 
-        const insertId = await create(touristEntity, imagePaths);
+//         const insertId = await create(touristEntity, imagePaths);
 
-        console.log('Insert ID:', insertId);
+//         console.log('Insert ID:', insertId);
 
-        res.json({
-            message: 'Tourist entity created successfully',
-            id: insertId
-        });
-    } catch (error) {
-        console.error('Error in createTouristEntity:', error);
-        res.status(500).json({
-            error: error.message
-        });
-    }
-};
+//         res.json({
+//             message: 'Tourist entity created successfully',
+//             id: insertId
+//         });
+//     } catch (error) {
+//         console.error('Error in createTouristEntity:', error);
+//         res.status(500).json({
+//             error: error.message
+//         });
+//     }
+// };
 
-const updateTouristEntity = async (req, res) => {
-    const id = req.params.id;
-    const touristEntity = req.body;
-    const imagePaths = req.files.map(file => `${file.filename}`);
-    const { district_name, category_name } = touristEntity;
+// const updateTouristEntity = async (req, res) => {
+//     const id = req.params.id;
+//     const touristEntity = req.body;
+//     const imagePaths = req.files.map(file => `${file.filename}`);
+//     const { district_name, category_name } = touristEntity;
 
-    try {
-        const districtId = await District.getIdByName(district_name);
-        const categoryId = await Category.getIdByName(category_name);
+//     try {
+//         const districtId = await District.getIdByName(district_name);
+//         const categoryId = await Category.getIdByName(category_name);
 
-        touristEntity.district_id = districtId;
-        touristEntity.category_id = categoryId;
+//         touristEntity.district_id = districtId;
+//         touristEntity.category_id = categoryId;
 
-        const affectedRows = await update(id, touristEntity, imagePaths);
-        if (affectedRows > 0) {
-            res.json({
-                message: `Tourist entity with ID ${id} updated successfully`
-            });
-        } else {
-            res.status(404).json({
-                error: 'Tourist entity not found'
-            });
-        }
-    } catch (error) {
-        res.status(500).json({
-            error: error.message
-        });
-    }
-};
+//         const affectedRows = await update(id, touristEntity, imagePaths);
+//         if (affectedRows > 0) {
+//             res.json({
+//                 message: `Tourist entity with ID ${id} updated successfully`
+//             });
+//         } else {
+//             res.status(404).json({
+//                 error: 'Tourist entity not found'
+//             });
+//         }
+//     } catch (error) {
+//         res.status(500).json({
+//             error: error.message
+//         });
+//     }
+// };
 
+// const create = async (touristEntity, imagePaths) => {
+//     const { name, description, location, latitude, longitude, district_id, category_id, created_by } = touristEntity;
+
+//     const conn = await pool.getConnection();
+//     try {
+//         await conn.beginTransaction();
+
+//         const [result] = await conn.query(
+//             'INSERT INTO tourist_entities (name, description, location, latitude, longitude, district_id, category_id, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+//             [name, description, location, latitude, longitude, district_id, category_id, created_by]
+//         );
+
+//         const tourismEntitiesId = result.insertId;
+
+//         if (imagePaths && imagePaths.length > 0) {
+//             const imageInsertPromises = imagePaths.map((imagePath) =>
+//                 conn.query(
+//                     'INSERT INTO tourism_entities_images (tourism_entities_id, image_path) VALUES (?, ?)',
+//                     [tourismEntitiesId, imagePath]
+//                 )
+//             );
+//             await Promise.all(imageInsertPromises);
+//         }
+
+//         await conn.commit();
+//         return tourismEntitiesId;
+//     } catch (error) {
+//         await conn.rollback();
+//         throw error;
+//     } finally {
+//         conn.release();
+//     }
+// };
+
+// const update = async (id, touristEntity, imagePaths) => {
+//     const { name, description, location, latitude, longitude, district_id, category_id } = touristEntity;
+
+//     const conn = await pool.getConnection();
+//     try {
+//         await conn.beginTransaction();
+
+//         const [result] = await conn.query(
+//             'UPDATE tourist_entities SET name=?, description=?, location=?, latitude=?, longitude=?, district_id=?, category_id=? WHERE id=?',
+//             [name, description, location, latitude, longitude, district_id, category_id, id]
+//         );
+
+//         await conn.query('DELETE FROM tourism_entities_images WHERE tourism_entities_id = ?', [id]);
+
+//         if (imagePaths && imagePaths.length > 0) {
+//             const imageInsertPromises = imagePaths.map((imagePath) =>
+//                 conn.query(
+//                     'INSERT INTO tourism_entities_images (tourism_entities_id, image_path) VALUES (?, ?)',
+//                     [id, imagePath]
+//                 )
+//             );
+//             await Promise.all(imageInsertPromises);
+//         }
+
+//         await conn.commit();
+//         return result.affectedRows;
+//     } catch (error) {
+//         await conn.rollback();
+//         throw error;
+//     } finally {
+//         conn.release();
+//     }
+// };
 // Delete a tourist entity
 const deleteTouristEntity = async (req, res) => {
     const id = req.params.id;
@@ -270,74 +337,6 @@ const getNearbyTouristEntities = async (latitude, longitude, distance, excludeId
     return rows;
 };
 
-const create = async (touristEntity, imagePaths) => {
-    const { name, description, location, latitude, longitude, district_id, category_id, created_by } = touristEntity;
-
-    const conn = await pool.getConnection();
-    try {
-        await conn.beginTransaction();
-
-        const [result] = await conn.query(
-            'INSERT INTO tourist_entities (name, description, location, latitude, longitude, district_id, category_id, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [name, description, location, latitude, longitude, district_id, category_id, created_by]
-        );
-
-        const tourismEntitiesId = result.insertId;
-
-        if (imagePaths && imagePaths.length > 0) {
-            const imageInsertPromises = imagePaths.map((imagePath) =>
-                conn.query(
-                    'INSERT INTO tourism_entities_images (tourism_entities_id, image_path) VALUES (?, ?)',
-                    [tourismEntitiesId, imagePath]
-                )
-            );
-            await Promise.all(imageInsertPromises);
-        }
-
-        await conn.commit();
-        return tourismEntitiesId;
-    } catch (error) {
-        await conn.rollback();
-        throw error;
-    } finally {
-        conn.release();
-    }
-};
-
-const update = async (id, touristEntity, imagePaths) => {
-    const { name, description, location, latitude, longitude, district_id, category_id } = touristEntity;
-
-    const conn = await pool.getConnection();
-    try {
-        await conn.beginTransaction();
-
-        const [result] = await conn.query(
-            'UPDATE tourist_entities SET name=?, description=?, location=?, latitude=?, longitude=?, district_id=?, category_id=? WHERE id=?',
-            [name, description, location, latitude, longitude, district_id, category_id, id]
-        );
-
-        await conn.query('DELETE FROM tourism_entities_images WHERE tourism_entities_id = ?', [id]);
-
-        if (imagePaths && imagePaths.length > 0) {
-            const imageInsertPromises = imagePaths.map((imagePath) =>
-                conn.query(
-                    'INSERT INTO tourism_entities_images (tourism_entities_id, image_path) VALUES (?, ?)',
-                    [id, imagePath]
-                )
-            );
-            await Promise.all(imageInsertPromises);
-        }
-
-        await conn.commit();
-        return result.affectedRows;
-    } catch (error) {
-        await conn.rollback();
-        throw error;
-    } finally {
-        conn.release();
-    }
-};
-
 const remove = async (id) => {
     try {
         const result = await pool.query('DELETE FROM tourist_entities WHERE id = ?', [id]);
@@ -370,6 +369,136 @@ const search = async (query) => {
     const [rows] = await pool.query(searchQuery, [`%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`]);
    
     return rows;
+};
+
+// ฟังก์ชันสร้างสถานที่ท่องเที่ยว
+const createTouristEntity = async (req, res) => {
+    const touristEntity = req.body;
+    const imagePath = req.file.filename; // รับเฉพาะ 1 รูปภาพ
+    const { district_name, category_name } = touristEntity;
+
+    console.log('Received Data:', touristEntity);
+    console.log('Image Path:', imagePath);
+
+    try {
+        const districtId = await District.getIdByName(district_name);
+        const categoryId = await Category.getIdByName(category_name);
+
+        touristEntity.district_id = districtId;
+        touristEntity.category_id = categoryId;
+        touristEntity.created_by = req.user.id;
+
+        console.log('Tourist Entity to be Inserted:', touristEntity);
+
+        const insertId = await create(touristEntity, imagePath);
+
+        console.log('Insert ID:', insertId);
+
+        res.json({
+            message: 'Tourist entity created successfully',
+            id: insertId
+        });
+    } catch (error) {
+        console.error('Error in createTouristEntity:', error);
+        res.status(500).json({
+            error: error.message
+        });
+    }
+};
+
+// ฟังก์ชันอัปเดตสถานที่ท่องเที่ยว
+const updateTouristEntity = async (req, res) => {
+    const id = req.params.id;
+    const touristEntity = req.body;
+    const imagePath = req.file.filename; // รับเฉพาะ 1 รูปภาพ
+    const { district_name, category_name } = touristEntity;
+
+    try {
+        const districtId = await District.getIdByName(district_name);
+        const categoryId = await Category.getIdByName(category_name);
+
+        touristEntity.district_id = districtId;
+        touristEntity.category_id = categoryId;
+
+        const affectedRows = await update(id, touristEntity, imagePath);
+        if (affectedRows > 0) {
+            res.json({
+                message: `Tourist entity with ID ${id} updated successfully`
+            });
+        } else {
+            res.status(404).json({
+                error: 'Tourist entity not found'
+            });
+        }
+    } catch (error) {
+        res.status(500).json({
+            error: error.message
+        });
+    }
+};
+
+// ฟังก์ชันสร้างข้อมูลสถานที่ท่องเที่ยว
+const create = async (touristEntity, imagePath) => {
+    const { name, description, location, latitude, longitude, district_id, category_id, created_by } = touristEntity;
+
+    const conn = await pool.getConnection();
+    try {
+        await conn.beginTransaction();
+
+        const [result] = await conn.query(
+            'INSERT INTO tourist_entities (name, description, location, latitude, longitude, district_id, category_id, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [name, description, location, latitude, longitude, district_id, category_id, created_by]
+        );
+
+        const tourismEntitiesId = result.insertId;
+
+        if (imagePath) {
+            await conn.query(
+                'INSERT INTO tourism_entities_images (tourism_entities_id, image_path) VALUES (?, ?)',
+                [tourismEntitiesId, imagePath]
+            );
+        }
+
+        await conn.commit();
+        return tourismEntitiesId;
+    } catch (error) {
+        await conn.rollback();
+        throw error;
+    } finally {
+        conn.release();
+    }
+};
+
+// ฟังก์ชันอัปเดตข้อมูลสถานที่ท่องเที่ยว
+const update = async (id, touristEntity, imagePath) => {
+    const { name, description, location, latitude, longitude, district_id, category_id } = touristEntity;
+
+    const conn = await pool.getConnection();
+    try {
+        await conn.beginTransaction();
+
+        const [result] = await conn.query(
+            'UPDATE tourist_entities SET name=?, description=?, location=?, latitude=?, longitude=?, district_id=?, category_id=? WHERE id=?',
+            [name, description, location, latitude, longitude, district_id, category_id, id]
+        );
+
+        await conn.query('DELETE FROM tourism_entities_images WHERE tourism_entities_id = ?', [id]);
+
+        if (imagePath) {
+            await conn.query(
+                'INSERT INTO tourism_entities_images (tourism_entities_id, image_path) VALUES (?, ?)',
+                [id, imagePath]
+            );
+        }
+
+        await conn.commit();
+        return result.affectedRows;
+    } catch (error) {
+        await conn.rollback();
+        throw error;
+    } finally {
+        conn.release();
+    }
 };
 
 export default {
