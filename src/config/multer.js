@@ -12,11 +12,23 @@ const storage = multer.diskStorage({
     cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
-    const uniqueName = `${Date.now()}-${file.originalname}`;
+    const uniqueName = `${file.originalname}`;
     console.log('Saved Filename:', uniqueName); // Log the saved filename
     cb(null, uniqueName);
   }
 });
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     const uploadPath = path.join(__dirname, '../../public/uploads');
+//     console.log('Upload Path:', uploadPath); // Log the upload path
+//     cb(null, uploadPath);
+//   },
+//   filename: (req, file, cb) => {
+//     const uniqueName = `${Date.now()}-${file.originalname}`;
+//     console.log('Saved Filename:', uniqueName); // Log the saved filename
+//     cb(null, uniqueName);
+//   }
+// });
 
 const fileFilter = (req, file, cb) => {
   const allowedTypes = /jpeg|jpg|png|gif/;

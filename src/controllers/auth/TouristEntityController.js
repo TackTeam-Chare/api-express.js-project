@@ -48,7 +48,10 @@ const getTouristEntityById = async (req, res) => {
         const [rows] = await pool.query(query, [id]);
         const touristEntity = rows[0];
         if (touristEntity && touristEntity.images) {
-            touristEntity.images = touristEntity.images.split(',');
+            touristEntity.images = touristEntity.images.split(',').map(image => ({
+                image_path: image,
+                image_url: `${process.env.BASE_URL}/uploads/${image}`,
+            }));
         }
         if (touristEntity) {
             res.json(touristEntity);
@@ -60,6 +63,39 @@ const getTouristEntityById = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+
+// const getTouristEntityById = async (req, res) => {
+//     try {
+//         const id = req.params.id;
+//         const query = `
+//             SELECT 
+//                 te.*, 
+//                 c.name AS category_name, 
+//                 d.name AS district_name, 
+//                 GROUP_CONCAT(ti.image_path) AS images
+//             FROM tourist_entities te
+//             JOIN categories c ON te.category_id = c.id
+//             JOIN district d ON te.district_id = d.id
+//             LEFT JOIN tourism_entities_images ti ON te.id = ti.tourism_entities_id
+//             WHERE te.id = ?
+//             GROUP BY te.id
+//         `;
+//         const [rows] = await pool.query(query, [id]);
+//         const touristEntity = rows[0];
+//         if (touristEntity && touristEntity.images) {
+//             touristEntity.images = touristEntity.images.split(',');
+//         }
+//         if (touristEntity) {
+//             res.json(touristEntity);
+//         } else {
+//             res.status(404).json({ error: 'Tourist entity not found' });
+//         }
+//     } catch (error) {
+//         console.error('Error fetching tourist entity:', error);
+//         res.status(500).json({ error: 'Internal server error' });
+//     }
+// };
 
 const getNearbyTouristEntitiesHandler = async (req, res) => {
     try {
