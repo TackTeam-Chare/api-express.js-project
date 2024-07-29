@@ -388,7 +388,7 @@ const remove = async (id) => {
 
 const createTouristEntity = async (req, res) => {
     const touristEntity = req.body;
-    const imagePath = req.file.filename; // รับเฉพาะ 1 รูปภาพ
+    const imagePath = req.file ? req.file.filename : null; // Handle file being optional
     const { district_name, category_name } = touristEntity;
 
     console.log('Received Data:', touristEntity);
@@ -420,38 +420,6 @@ const createTouristEntity = async (req, res) => {
     }
 };
 
-const updateTouristEntity = async (req, res) => {
-    const id = req.params.id;
-    const touristEntity = req.body;
-    const imagePath = req.file ? req.file.filename : null; // Handle no file case
-    const { district_name, category_name } = touristEntity;
-  
-    try {
-      const districtId = await District.getIdByName(district_name);
-      const categoryId = await Category.getIdByName(category_name);
-  
-      touristEntity.district_id = districtId;
-      touristEntity.category_id = categoryId;
-  
-      const affectedRows = await update(id, touristEntity, imagePath);
-      if (affectedRows > 0) {
-        res.json({
-          message: `Tourist entity with ID ${id} updated successfully`
-        });
-      } else {
-        res.status(404).json({
-          error: 'Tourist entity not found'
-        });
-      }
-    } catch (error) {
-      res.status(500).json({
-        error: error.message
-      });
-    }
-  };
-  
-
-// ฟังก์ชันสร้างข้อมูลสถานที่ท่องเที่ยว
 const create = async (touristEntity, imagePath) => {
     const { name, description, location, latitude, longitude, district_id, category_id, created_by } = touristEntity;
 
@@ -482,6 +450,37 @@ const create = async (touristEntity, imagePath) => {
         conn.release();
     }
 };
+
+
+const updateTouristEntity = async (req, res) => {
+    const id = req.params.id;
+    const touristEntity = req.body;
+    const imagePath = req.file ? req.file.filename : null; // Handle no file case
+    const { district_name, category_name } = touristEntity;
+  
+    try {
+      const districtId = await District.getIdByName(district_name);
+      const categoryId = await Category.getIdByName(category_name);
+  
+      touristEntity.district_id = districtId;
+      touristEntity.category_id = categoryId;
+  
+      const affectedRows = await update(id, touristEntity, imagePath);
+      if (affectedRows > 0) {
+        res.json({
+          message: `Tourist entity with ID ${id} updated successfully`
+        });
+      } else {
+        res.status(404).json({
+          error: 'Tourist entity not found'
+        });
+      }
+    } catch (error) {
+      res.status(500).json({
+        error: error.message
+      });
+    }
+  };
 
 const update = async (id, touristEntity, imagePath) => {
     const { name, description, location, latitude, longitude, district_id, category_id } = touristEntity;
