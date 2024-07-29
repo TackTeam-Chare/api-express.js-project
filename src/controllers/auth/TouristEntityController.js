@@ -420,36 +420,36 @@ const createTouristEntity = async (req, res) => {
     }
 };
 
-// ฟังก์ชันอัปเดตสถานที่ท่องเที่ยว
 const updateTouristEntity = async (req, res) => {
     const id = req.params.id;
     const touristEntity = req.body;
-    const imagePath = req.file.filename; // รับเฉพาะ 1 รูปภาพ
+    const imagePath = req.file ? req.file.filename : null; // Handle no file case
     const { district_name, category_name } = touristEntity;
-
+  
     try {
-        const districtId = await District.getIdByName(district_name);
-        const categoryId = await Category.getIdByName(category_name);
-
-        touristEntity.district_id = districtId;
-        touristEntity.category_id = categoryId;
-
-        const affectedRows = await update(id, touristEntity, imagePath);
-        if (affectedRows > 0) {
-            res.json({
-                message: `Tourist entity with ID ${id} updated successfully`
-            });
-        } else {
-            res.status(404).json({
-                error: 'Tourist entity not found'
-            });
-        }
-    } catch (error) {
-        res.status(500).json({
-            error: error.message
+      const districtId = await District.getIdByName(district_name);
+      const categoryId = await Category.getIdByName(category_name);
+  
+      touristEntity.district_id = districtId;
+      touristEntity.category_id = categoryId;
+  
+      const affectedRows = await update(id, touristEntity, imagePath);
+      if (affectedRows > 0) {
+        res.json({
+          message: `Tourist entity with ID ${id} updated successfully`
         });
+      } else {
+        res.status(404).json({
+          error: 'Tourist entity not found'
+        });
+      }
+    } catch (error) {
+      res.status(500).json({
+        error: error.message
+      });
     }
-};
+  };
+  
 
 // ฟังก์ชันสร้างข้อมูลสถานที่ท่องเที่ยว
 const create = async (touristEntity, imagePath) => {
@@ -483,37 +483,36 @@ const create = async (touristEntity, imagePath) => {
     }
 };
 
-// ฟังก์ชันอัปเดตข้อมูลสถานที่ท่องเที่ยว
 const update = async (id, touristEntity, imagePath) => {
     const { name, description, location, latitude, longitude, district_id, category_id } = touristEntity;
-
+  
     const conn = await pool.getConnection();
     try {
-        await conn.beginTransaction();
-
-        const [result] = await conn.query(
-            'UPDATE tourist_entities SET name=?, description=?, location=?, latitude=?, longitude=?, district_id=?, category_id=? WHERE id=?',
-            [name, description, location, latitude, longitude, district_id, category_id, id]
-        );
-
+      await conn.beginTransaction();
+  
+      const [result] = await conn.query(
+        'UPDATE tourist_entities SET name=?, description=?, location=?, latitude=?, longitude=?, district_id=?, category_id=? WHERE id=?',
+        [name, description, location, latitude, longitude, district_id, category_id, id]
+      );
+  
+      if (imagePath) {
         await conn.query('DELETE FROM tourism_entities_images WHERE tourism_entities_id = ?', [id]);
-
-        if (imagePath) {
-            await conn.query(
-                'INSERT INTO tourism_entities_images (tourism_entities_id, image_path) VALUES (?, ?)',
-                [id, imagePath]
-            );
-        }
-
-        await conn.commit();
-        return result.affectedRows;
+        await conn.query(
+          'INSERT INTO tourism_entities_images (tourism_entities_id, image_path) VALUES (?, ?)',
+          [id, imagePath]
+        );
+      }
+  
+      await conn.commit();
+      return result.affectedRows;
     } catch (error) {
-        await conn.rollback();
-        throw error;
+      await conn.rollback();
+      throw error;
     } finally {
-        conn.release();
+      conn.release();
     }
-};
+  };
+  
 
 export default {
     searchTouristEntities,
@@ -524,5 +523,4 @@ export default {
     createTouristEntity,
     updateTouristEntity,
     deleteTouristEntity,
-   
 };
