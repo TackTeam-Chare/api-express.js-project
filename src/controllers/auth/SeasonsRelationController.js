@@ -3,15 +3,32 @@ import pool from '../../config/db.js';
 // Controller functions with integrated model code
 
 // Get all seasons_relation
+// const getAllSeasonsRelations = async (req, res) => {
+//     try {
+//         const query = 'SELECT * FROM seasons_relation';
+//         const [relations] = await pool.query(query);
+//         res.json(relations);
+//     } catch (error) {
+//         res.status(500).json({ error: 'Internal server error' });
+//     }
+// };
+
 const getAllSeasonsRelations = async (req, res) => {
     try {
-        const query = 'SELECT * FROM seasons_relation';
+        const query = `
+            SELECT sr.id, sr.season_id, sr.tourism_entities_id, s.name AS season_name, te.name AS tourism_entity_name
+            FROM seasons_relation sr
+            JOIN seasons s ON sr.season_id = s.id
+            JOIN tourist_entities te ON sr.tourism_entities_id = te.id
+        `;
         const [relations] = await pool.query(query);
         res.json(relations);
     } catch (error) {
+        console.error('Error fetching seasons relations:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
 
 // Get seasons_relation by ID
 const getSeasonsRelationById = async (req, res) => {

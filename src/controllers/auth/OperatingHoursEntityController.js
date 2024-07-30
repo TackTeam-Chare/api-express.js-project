@@ -2,9 +2,31 @@ import pool from '../../config/db.js';
 
 // Controller functions with integrated model code
 
+// const getAllOperatingHours = async (req, res) => {
+//     try {
+//         const query = 'SELECT * FROM operating_hours';
+//         const [operatingHours] = await pool.query(query);
+//         res.json(operatingHours);
+//     } catch (error) {
+//         console.error('Error fetching operating hours:', error);
+//         res.status(500).json({
+//             error: 'Internal server error'
+//         });
+//     }
+// };
 const getAllOperatingHours = async (req, res) => {
     try {
-        const query = 'SELECT * FROM operating_hours';
+        const query = `
+            SELECT 
+                oh.*, 
+                te.name AS place_name 
+            FROM 
+                operating_hours oh 
+            JOIN 
+                tourist_entities te 
+            ON 
+                oh.place_id = te.id
+        `;
         const [operatingHours] = await pool.query(query);
         res.json(operatingHours);
     } catch (error) {
@@ -14,7 +36,6 @@ const getAllOperatingHours = async (req, res) => {
         });
     }
 };
-
 // Create a new operating hours
 const createOperatingHours = async (req, res) => {
     const operatingHour = req.body;

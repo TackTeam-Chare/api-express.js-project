@@ -2,19 +2,36 @@ import pool from '../../config/db.js';
 
 // Controller functions with integrated model code
 
+// // ดึงภาพทั้งหมด
+// const getAllImages = async (req, res) => {
+//     try {
+//         const query = 'SELECT * FROM tourism_entities_images';
+//         const [images] = await pool.query(query);
+//         console.log('All Images:', images);
+//         res.json(images);
+//     } catch (error) {
+//         console.error('Error fetching all images:', error);
+//         res.status(500).json({ error: 'Internal server error' });
+//     }
+// };
 // ดึงภาพทั้งหมด
 const getAllImages = async (req, res) => {
     try {
-        const query = 'SELECT * FROM tourism_entities_images';
+        const query = `
+            SELECT tii.id, tii.tourism_entities_id, tii.image_path, te.name as tourism_entity_name
+            FROM tourism_entities_images tii
+            JOIN tourist_entities te ON tii.tourism_entities_id = te.id
+        `;
         const [images] = await pool.query(query);
-        console.log('All Images:', images);
+        images.forEach(image => {
+            image.image_url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${image.image_path}`;
+        });
         res.json(images);
     } catch (error) {
         console.error('Error fetching all images:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
-
 // ดึงภาพตามไอดี
 const getImageById = async (req, res) => {
     try {
