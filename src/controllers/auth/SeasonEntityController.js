@@ -123,7 +123,7 @@ const getTouristEntitiesBySeasonRealTime = async (req, res) => {
     try {
         const currentDate = new Date();
         const month = currentDate.getMonth() + 1; // getMonth() returns 0-11
-  
+
         let seasonId;
         if (month >= 3 && month <= 5) {
             seasonId = await getIdByName('Summer');
@@ -134,7 +134,7 @@ const getTouristEntitiesBySeasonRealTime = async (req, res) => {
         } else {
             seasonId = await getIdByName('Annual');
         }
-  
+
         const query = `
             SELECT
                 te.*, 
@@ -162,13 +162,19 @@ const getTouristEntitiesBySeasonRealTime = async (req, res) => {
 };
 
 const getIdByName = async (name) => {
-    const [rows] = await pool.query('SELECT id FROM seasons WHERE name = ?', [name]);
-    if (rows.length > 0) {
-        return rows[0].id;
-    } else {
-        throw new Error(`Season '${name}' not found`);
+    try {
+        const [rows] = await pool.query('SELECT id FROM seasons WHERE name = ?', [name]);
+        if (rows.length > 0) {
+            return rows[0].id;
+        } else {
+            throw new Error(`Season '${name}' not found`);
+        }
+    } catch (error) {
+        console.error('Error fetching season id by name:', error);
+        throw error;
     }
 };
+
 
 export default {
     getAllSeasons,

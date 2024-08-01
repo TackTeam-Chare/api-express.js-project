@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 27, 2024 at 09:22 PM
+-- Generation Time: Jul 31, 2024 at 11:20 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -39,7 +39,8 @@ CREATE TABLE `admin` (
 --
 
 INSERT INTO `admin` (`id`, `username`, `password`, `name`) VALUES
-(1, 'tackteam_chare', '$2a$10$HImeAc9X3omgyAGbRidpfec6kibyLWViuJItEwdCqp7yNi0EqqdcK', 'Admin_Team');
+(1, 'tackteam_chare', '$2a$10$HImeAc9X3omgyAGbRidpfec6kibyLWViuJItEwdCqp7yNi0EqqdcK', 'Admin_Team'),
+(2, 'tackteam_Admin', '$2a$10$toz63FzTuYTtxaldh2fahOBlhenIAn/oGbK/m5Aa1fGWzlJeyEkUm', 'tackteam_Admin');
 
 -- --------------------------------------------------------
 
@@ -267,25 +268,25 @@ ALTER TABLE `tourist_entities`
 -- AUTO_INCREMENT for table `admin`
 --
 ALTER TABLE `admin`
-  MODIFY `id` int(7) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(7) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `admin_tokens`
 --
 ALTER TABLE `admin_tokens`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `district`
 --
 ALTER TABLE `district`
-  MODIFY `id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `operating_hours`
@@ -297,7 +298,7 @@ ALTER TABLE `operating_hours`
 -- AUTO_INCREMENT for table `seasons`
 --
 ALTER TABLE `seasons`
-  MODIFY `id` int(7) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(7) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `seasons_relation`

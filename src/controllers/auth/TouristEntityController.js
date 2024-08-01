@@ -389,24 +389,24 @@ const remove = async (id) => {
 const createTouristEntity = async (req, res) => {
     const touristEntity = req.body;
     const imagePath = req.file ? req.file.filename : null; // Handle file being optional
-    const { district_name, category_name } = touristEntity;
+    const { district_name, category_name, season_id, operating_hours } = touristEntity;
 
     console.log('Received Data:', touristEntity);
     console.log('Image Path:', imagePath);
+    console.log('Operating Hours:', operating_hours);
 
     try {
         const districtId = await District.getIdByName(district_name);
-        const categoryId = await Category.getIdByName(category_name);
+        let categoryId = null;
+        if (category_name) {
+            categoryId = await Category.getIdByName(category_name);
+        }
 
         touristEntity.district_id = districtId;
         touristEntity.category_id = categoryId;
         touristEntity.created_by = req.user.id;
 
-        console.log('Tourist Entity to be Inserted:', touristEntity);
-
-        const insertId = await create(touristEntity, imagePath);
-
-        console.log('Insert ID:', insertId);
+        const insertId = await create(touristEntity, imagePath, season_id, operating_hours);
 
         res.json({
             message: 'Tourist entity created successfully',
@@ -420,7 +420,7 @@ const createTouristEntity = async (req, res) => {
     }
 };
 
-const create = async (touristEntity, imagePath) => {
+const create = async (touristEntity, imagePath, season_id, operatingHours) => {
     const { name, description, location, latitude, longitude, district_id, category_id, created_by } = touristEntity;
 
     const conn = await pool.getConnection();
@@ -441,6 +441,23 @@ const create = async (touristEntity, imagePath) => {
             );
         }
 
+        if (season_id) {
+            await conn.query(
+                'INSERT INTO seasons_relation (season_id, tourism_entities_id) VALUES (?, ?)',
+                [season_id, tourismEntitiesId]
+            );
+        }
+
+        if (operatingHours && operatingHours.length > 0) {
+            const operatingHoursData = JSON.parse(operatingHours);
+            for (const hour of operatingHoursData) {
+                await conn.query(
+                    'INSERT INTO operating_hours (place_id, day_of_week, opening_time, closing_time) VALUES (?, ?, ?, ?)',
+                    [tourismEntitiesId, hour.day_of_week, hour.opening_time, hour.closing_time]
+                );
+            }
+        }
+
         await conn.commit();
         return tourismEntitiesId;
     } catch (error) {
@@ -450,6 +467,71 @@ const create = async (touristEntity, imagePath) => {
         conn.release();
     }
 };
+
+// const createTouristEntity = async (req, res) => {
+//     const touristEntity = req.body;
+//     const imagePath = req.file ? req.file.filename : null; // Handle file being optional
+//     const { district_name, category_name } = touristEntity;
+
+//     console.log('Received Data:', touristEntity);
+//     console.log('Image Path:', imagePath);
+
+//     try {
+//         const districtId = await District.getIdByName(district_name);
+//         const categoryId = await Category.getIdByName(category_name);
+
+//         touristEntity.district_id = districtId;
+//         touristEntity.category_id = categoryId;
+//         touristEntity.created_by = req.user.id;
+
+//         console.log('Tourist Entity to be Inserted:', touristEntity);
+
+//         const insertId = await create(touristEntity, imagePath);
+
+//         console.log('Insert ID:', insertId);
+
+//         res.json({
+//             message: 'Tourist entity created successfully',
+//             id: insertId
+//         });
+//     } catch (error) {
+//         console.error('Error in createTouristEntity:', error);
+//         res.status(500).json({
+//             error: error.message
+//         });
+//     }
+// };
+
+// const create = async (touristEntity, imagePath) => {
+//     const { name, description, location, latitude, longitude, district_id, category_id, created_by } = touristEntity;
+
+//     const conn = await pool.getConnection();
+//     try {
+//         await conn.beginTransaction();
+
+//         const [result] = await conn.query(
+//             'INSERT INTO tourist_entities (name, description, location, latitude, longitude, district_id, category_id, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+//             [name, description, location, latitude, longitude, district_id, category_id, created_by]
+//         );
+
+//         const tourismEntitiesId = result.insertId;
+
+//         if (imagePath) {
+//             await conn.query(
+//                 'INSERT INTO tourism_entities_images (tourism_entities_id, image_path) VALUES (?, ?)',
+//                 [tourismEntitiesId, imagePath]
+//             );
+//         }
+
+//         await conn.commit();
+//         return tourismEntitiesId;
+//     } catch (error) {
+//         await conn.rollback();
+//         throw error;
+//     } finally {
+//         conn.release();
+//     }
+// };
 
 
 const updateTouristEntity = async (req, res) => {
