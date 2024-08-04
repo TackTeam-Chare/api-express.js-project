@@ -72,22 +72,39 @@ const getTouristEntityById = async (req, res) => {
                 te.*, 
                 c.name AS category_name, 
                 d.name AS district_name, 
-                GROUP_CONCAT(ti.image_path) AS images
+                GROUP_CONCAT(ti.image_path) AS images,
+                sr.season_id,
+                GROUP_CONCAT(
+                    JSON_OBJECT(
+                        'day_of_week', oh.day_of_week,
+                        'opening_time', DATE_FORMAT(oh.opening_time, '%H:%i'),
+                        'closing_time', DATE_FORMAT(oh.closing_time, '%H:%i')
+                    ) ORDER BY oh.day_of_week
+                ) AS operating_hours
             FROM tourist_entities te
             JOIN categories c ON te.category_id = c.id
             JOIN district d ON te.district_id = d.id
             LEFT JOIN tourism_entities_images ti ON te.id = ti.tourism_entities_id
+            LEFT JOIN seasons_relation sr ON te.id = sr.tourism_entities_id
+            LEFT JOIN operating_hours oh ON te.id = oh.place_id
             WHERE te.id = ?
-            GROUP BY te.id
+            GROUP BY te.id, sr.season_id
         `;
         const [rows] = await pool.query(query, [id]);
         const touristEntity = rows[0];
+        
+        // Transform operating_hours from string to JSON array
+        if (touristEntity && touristEntity.operating_hours) {
+            touristEntity.operating_hours = JSON.parse(`[${touristEntity.operating_hours}]`);
+        }
+
         if (touristEntity && touristEntity.images) {
             touristEntity.images = touristEntity.images.split(',').map(image => ({
                 image_path: image,
                 image_url: `${process.env.BASE_URL}/uploads/${image}`,
             }));
         }
+        
         if (touristEntity) {
             res.json(touristEntity);
         } else {
@@ -96,6 +113,90 @@ const getTouristEntityById = async (req, res) => {
     } catch (error) {
         console.error('Error fetching tourist entity:', error);
         res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+
+const updateTouristEntity = async (req, res) => {
+    const id = req.params.id;
+    const touristEntity = req.body;
+    const imagePath = req.file ? req.file.filename : null; // Handle no file case
+    const { district_name, category_name, season_id, operating_hours } = touristEntity;
+  
+    try {
+      const districtId = await District.getIdByName(district_name);
+      const categoryId = await Category.getIdByName(category_name);
+  
+      touristEntity.district_id = districtId;
+      touristEntity.category_id = categoryId;
+  
+      const affectedRows = await update(id, touristEntity, imagePath, season_id, operating_hours);
+      if (affectedRows > 0) {
+        res.json({
+          message: `Tourist entity with ID ${id} updated successfully`
+        });
+      } else {
+        res.status(404).json({
+          error: 'Tourist entity not found'
+        });
+      }
+    } catch (error) {
+      res.status(500).json({
+        error: error.message
+      });
+    }
+};
+
+const update = async (id, touristEntity, imagePath, season_id, operating_hours) => {
+    const { name, description, location, latitude, longitude, district_id, category_id } = touristEntity;
+  
+    const conn = await pool.getConnection();
+    try {
+        await conn.beginTransaction();
+  
+        const [result] = await conn.query(
+            'UPDATE tourist_entities SET name=?, description=?, location=?, latitude=?, longitude=?, district_id=?, category_id=? WHERE id=?',
+            [name, description, location, latitude, longitude, district_id, category_id, id]
+        );
+  
+        if (imagePath) {
+            await conn.query('DELETE FROM tourism_entities_images WHERE tourism_entities_id = ?', [id]);
+            await conn.query(
+                'INSERT INTO tourism_entities_images (tourism_entities_id, image_path) VALUES (?, ?)',
+                [id, imagePath]
+            );
+        }
+
+        if (season_id) {
+            await conn.query('DELETE FROM seasons_relation WHERE tourism_entities_id = ?', [id]);
+            await conn.query(
+                'INSERT INTO seasons_relation (season_id, tourism_entities_id) VALUES (?, ?)',
+                [season_id, id]
+            );
+        }
+  
+        // Delete existing operating hours
+        await conn.query('DELETE FROM operating_hours WHERE place_id = ?', [id]);
+
+        // Insert new operating hours
+        if (operating_hours && operating_hours.length > 0) {
+            const operatingHoursData = JSON.parse(operating_hours);
+            for (const hour of operatingHoursData) {
+                await conn.query(
+                    'INSERT INTO operating_hours (place_id, day_of_week, opening_time, closing_time) VALUES (?, ?, ?, ?)',
+                    [id, hour.day_of_week, hour.opening_time, hour.closing_time]
+                );
+            }
+        }
+  
+        await conn.commit();
+        return result.affectedRows;
+    } catch (error) {
+        await conn.rollback();
+        throw error;
+    } finally {
+        conn.release();
     }
 };
 
@@ -532,68 +633,6 @@ const create = async (touristEntity, imagePath, season_id, operatingHours) => {
 //         conn.release();
 //     }
 // };
-
-
-const updateTouristEntity = async (req, res) => {
-    const id = req.params.id;
-    const touristEntity = req.body;
-    const imagePath = req.file ? req.file.filename : null; // Handle no file case
-    const { district_name, category_name } = touristEntity;
-  
-    try {
-      const districtId = await District.getIdByName(district_name);
-      const categoryId = await Category.getIdByName(category_name);
-  
-      touristEntity.district_id = districtId;
-      touristEntity.category_id = categoryId;
-  
-      const affectedRows = await update(id, touristEntity, imagePath);
-      if (affectedRows > 0) {
-        res.json({
-          message: `Tourist entity with ID ${id} updated successfully`
-        });
-      } else {
-        res.status(404).json({
-          error: 'Tourist entity not found'
-        });
-      }
-    } catch (error) {
-      res.status(500).json({
-        error: error.message
-      });
-    }
-  };
-
-const update = async (id, touristEntity, imagePath) => {
-    const { name, description, location, latitude, longitude, district_id, category_id } = touristEntity;
-  
-    const conn = await pool.getConnection();
-    try {
-      await conn.beginTransaction();
-  
-      const [result] = await conn.query(
-        'UPDATE tourist_entities SET name=?, description=?, location=?, latitude=?, longitude=?, district_id=?, category_id=? WHERE id=?',
-        [name, description, location, latitude, longitude, district_id, category_id, id]
-      );
-  
-      if (imagePath) {
-        await conn.query('DELETE FROM tourism_entities_images WHERE tourism_entities_id = ?', [id]);
-        await conn.query(
-          'INSERT INTO tourism_entities_images (tourism_entities_id, image_path) VALUES (?, ?)',
-          [id, imagePath]
-        );
-      }
-  
-      await conn.commit();
-      return result.affectedRows;
-    } catch (error) {
-      await conn.rollback();
-      throw error;
-    } finally {
-      conn.release();
-    }
-  };
-  
 
 export default {
     searchTouristEntities,
