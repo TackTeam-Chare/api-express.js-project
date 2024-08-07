@@ -27,7 +27,8 @@ const search = async (query) => {
         LEFT JOIN 
             tourism_entities_images ti ON te.id = ti.tourism_entities_id
         WHERE 
-            te.name LIKE ? OR te.description LIKE ? OR c.name LIKE ? OR d.name LIKE ?
+            (te.name LIKE ? OR te.description LIKE ? OR c.name LIKE ? OR d.name LIKE ?)
+            AND te.published = 1
         GROUP BY 
             te.id
     `;
@@ -35,6 +36,7 @@ const search = async (query) => {
    
     return rows;
 };
+
 const getAllTouristEntities = async (req, res) => {
     try {
         const query = `
@@ -42,7 +44,8 @@ const getAllTouristEntities = async (req, res) => {
             FROM tourist_entities te
             JOIN categories c ON te.category_id = c.id
             JOIN district d ON te.district_id = d.id
-            LEFT JOIN tourism_entities_images ti ON te.id = ti.tourism_entities_id;
+            LEFT JOIN tourism_entities_images ti ON te.id = ti.tourism_entities_id
+            WHERE te.published = 1;
         `;
         const [entities] = await pool.query(query);
         if (entities && entities.length > 0) {
@@ -60,7 +63,7 @@ const getAllTouristEntities = async (req, res) => {
     }
 };
 
-// ดึงสถานที่ของเเต่ละไอดี
+// Get tourist entity by ID
 const getTouristEntityById = async (req, res) => {
     try {
         const id = req.params.id;
@@ -70,7 +73,7 @@ const getTouristEntityById = async (req, res) => {
             JOIN categories c ON te.category_id = c.id
             JOIN district d ON te.district_id = d.id
             LEFT JOIN tourism_entities_images ti ON te.id = ti.tourism_entities_id
-            WHERE te.id = ?
+            WHERE te.id = ? AND te.published = 1
         `;
         const [rows] = await pool.query(query, [id]);
         const touristEntity = rows[0];
@@ -130,7 +133,7 @@ const getTouristEntityDetailsById = async (id) => {
         JOIN categories c ON te.category_id = c.id
         JOIN district d ON te.district_id = d.id
         LEFT JOIN tourism_entities_images ti ON te.id = ti.tourism_entities_id
-        WHERE te.id = ?
+        WHERE te.id = ? AND te.published = 1
         GROUP BY te.id
     `;
     const [rows] = await pool.query(query, [id]);
@@ -163,6 +166,7 @@ const getNearbyTouristEntities = async (latitude, longitude, distance, excludeId
         JOIN district d ON te.district_id = d.id
         LEFT JOIN operating_hours oh ON te.id = oh.place_id
         WHERE te.id != ? AND te.latitude BETWEEN -90 AND 90 AND te.longitude BETWEEN -180 AND 180
+            AND te.published = 1
             AND ST_Distance_Sphere(
                     point(te.longitude, te.latitude), 
                     point(?, ?)
@@ -190,5 +194,4 @@ export default {
     getNearbyTouristEntitiesHandler,
     getTouristEntityDetailsById,
     getNearbyTouristEntities
-
 };

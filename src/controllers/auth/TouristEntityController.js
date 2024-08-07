@@ -2,6 +2,13 @@ import pool from '../../config/db.js';
 import District from '../auth/DistrictEntityController.js';
 import Category from '../auth/CategoryEntityController.js';
 
+const logTouristEntity = async (id) => {
+    const query = 'SELECT `id`, `name`, `description`, `location`, `latitude`, `longitude`, `district_id`, `category_id`, `created_date`, `created_by`, `published` FROM `tourist_entities` WHERE `id` = ?';
+    const [rows] = await pool.query(query, [id]);
+    console.log('Tourist entity data:', rows[0]);
+};
+
+
 // Controller functions with integrated model code
 const searchTouristEntities = async (req, res) => {
     const { q } = req.query;
@@ -116,8 +123,6 @@ const getTouristEntityById = async (req, res) => {
     }
 };
 
-
-
 const updateTouristEntity = async (req, res) => {
     const id = req.params.id;
     const touristEntity = req.body;
@@ -149,33 +154,38 @@ const updateTouristEntity = async (req, res) => {
 };
 
 const update = async (id, touristEntity, imagePath, season_id, operating_hours) => {
-    const { name, description, location, latitude, longitude, district_id, category_id } = touristEntity;
-  
+    const { name, description, location, latitude, longitude, district_id, category_id, published } = touristEntity;
+
+    const isPublished = published === 'true' ? 1 : 0;
+
     const conn = await pool.getConnection();
     try {
         await conn.beginTransaction();
-  
+
         const [result] = await conn.query(
-            'UPDATE tourist_entities SET name=?, description=?, location=?, latitude=?, longitude=?, district_id=?, category_id=? WHERE id=?',
-            [name, description, location, latitude, longitude, district_id, category_id, id]
+            'UPDATE tourist_entities SET name=?, description=?, location=?, latitude=?, longitude=?, district_id=?, category_id=?, published=? WHERE id=?',
+            [name, description, location, latitude, longitude, district_id, category_id, isPublished, id]
         );
-  
+        console.log('Tourist entity updated:', result);
+
         if (imagePath) {
             await conn.query('DELETE FROM tourism_entities_images WHERE tourism_entities_id = ?', [id]);
-            await conn.query(
+            const [imageResult] = await conn.query(
                 'INSERT INTO tourism_entities_images (tourism_entities_id, image_path) VALUES (?, ?)',
                 [id, imagePath]
             );
+            console.log('Image inserted:', imageResult);
         }
 
         if (season_id) {
             await conn.query('DELETE FROM seasons_relation WHERE tourism_entities_id = ?', [id]);
-            await conn.query(
+            const [seasonResult] = await conn.query(
                 'INSERT INTO seasons_relation (season_id, tourism_entities_id) VALUES (?, ?)',
                 [season_id, id]
             );
+            console.log('Season relation inserted:', seasonResult);
         }
-  
+
         // Delete existing operating hours
         await conn.query('DELETE FROM operating_hours WHERE place_id = ?', [id]);
 
@@ -183,14 +193,19 @@ const update = async (id, touristEntity, imagePath, season_id, operating_hours) 
         if (operating_hours && operating_hours.length > 0) {
             const operatingHoursData = JSON.parse(operating_hours);
             for (const hour of operatingHoursData) {
-                await conn.query(
+                const [hoursResult] = await conn.query(
                     'INSERT INTO operating_hours (place_id, day_of_week, opening_time, closing_time) VALUES (?, ?, ?, ?)',
                     [id, hour.day_of_week, hour.opening_time, hour.closing_time]
                 );
+                console.log('Operating hours inserted:', hoursResult);
             }
         }
-  
+
         await conn.commit();
+
+        // Log the updated tourist entity
+        await logTouristEntity(id);
+
         return result.affectedRows;
     } catch (error) {
         await conn.rollback();
@@ -199,6 +214,7 @@ const update = async (id, touristEntity, imagePath, season_id, operating_hours) 
         conn.release();
     }
 };
+
 
 
 // const getTouristEntityById = async (req, res) => {
@@ -522,44 +538,54 @@ const createTouristEntity = async (req, res) => {
 };
 
 const create = async (touristEntity, imagePath, season_id, operatingHours) => {
-    const { name, description, location, latitude, longitude, district_id, category_id, created_by } = touristEntity;
+    const { name, description, location, latitude, longitude, district_id, category_id, created_by, published } = touristEntity;
+
+    const isPublished = published === 'true' ? 1 : 0;
 
     const conn = await pool.getConnection();
     try {
         await conn.beginTransaction();
 
         const [result] = await conn.query(
-            'INSERT INTO tourist_entities (name, description, location, latitude, longitude, district_id, category_id, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [name, description, location, latitude, longitude, district_id, category_id, created_by]
+            'INSERT INTO tourist_entities (name, description, location, latitude, longitude, district_id, category_id, created_by, published) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [name, description, location, latitude, longitude, district_id, category_id, created_by, isPublished]
         );
+        console.log('Tourist entity inserted:', result);
 
         const tourismEntitiesId = result.insertId;
 
         if (imagePath) {
-            await conn.query(
+            const [imageResult] = await conn.query(
                 'INSERT INTO tourism_entities_images (tourism_entities_id, image_path) VALUES (?, ?)',
                 [tourismEntitiesId, imagePath]
             );
+            console.log('Image inserted:', imageResult);
         }
 
         if (season_id) {
-            await conn.query(
+            const [seasonResult] = await conn.query(
                 'INSERT INTO seasons_relation (season_id, tourism_entities_id) VALUES (?, ?)',
                 [season_id, tourismEntitiesId]
             );
+            console.log('Season relation inserted:', seasonResult);
         }
 
         if (operatingHours && operatingHours.length > 0) {
             const operatingHoursData = JSON.parse(operatingHours);
             for (const hour of operatingHoursData) {
-                await conn.query(
+                const [hoursResult] = await conn.query(
                     'INSERT INTO operating_hours (place_id, day_of_week, opening_time, closing_time) VALUES (?, ?, ?, ?)',
                     [tourismEntitiesId, hour.day_of_week, hour.opening_time, hour.closing_time]
                 );
+                console.log('Operating hours inserted:', hoursResult);
             }
         }
 
         await conn.commit();
+
+        // Log the newly created tourist entity
+        await logTouristEntity(tourismEntitiesId);
+
         return tourismEntitiesId;
     } catch (error) {
         await conn.rollback();
@@ -568,6 +594,9 @@ const create = async (touristEntity, imagePath, season_id, operatingHours) => {
         conn.release();
     }
 };
+
+
+
 
 // const createTouristEntity = async (req, res) => {
 //     const touristEntity = req.body;

@@ -39,8 +39,31 @@ const removeAdmin = async (id) => {
 
 // Controller functions
 
+// ไม่มี role
+// const createAdminHandler = async (req, res) => {
+//     const { username, password, name } = req.body;
+//     try {
+//         const [existingAdmin] = await pool.query('SELECT * FROM admin WHERE username = ?', [username]);
+//         if (existingAdmin.length > 0) {
+//             return res.status(400).json({ error: 'Username already exists' });
+//         }
+
+//         const hashedPassword = await bcrypt.hash(password, 10);
+//         const admin = { username, password: hashedPassword, name };
+//         const insertId = await createAdmin(admin);
+
+//         const token = jwt.sign({ id: insertId, username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+//         await storeToken(insertId, token);
+//         res.json({ message: 'Admin created successfully', id: insertId, token });
+//     } catch (error) {
+//         console.error('Error creating admin:', error);
+//         res.status(500).json({ error: error.message });
+//     }
+// };
+
+// + role
 const createAdminHandler = async (req, res) => {
-    const { username, password, name } = req.body;
+    const { username, password, name, role } = req.body;
     try {
         const [existingAdmin] = await pool.query('SELECT * FROM admin WHERE username = ?', [username]);
         if (existingAdmin.length > 0) {
@@ -48,10 +71,10 @@ const createAdminHandler = async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const admin = { username, password: hashedPassword, name };
+        const admin = { username, password: hashedPassword, name, role };
         const insertId = await createAdmin(admin);
 
-        const token = jwt.sign({ id: insertId, username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ id: insertId, username, role }, process.env.JWT_SECRET, { expiresIn: '1h' });
         await storeToken(insertId, token);
         res.json({ message: 'Admin created successfully', id: insertId, token });
     } catch (error) {
@@ -235,6 +258,23 @@ const verifyPasswordHandler = async (req, res) => {
     }
 };
 
+const updatePostPublishStatus = async (req, res) => {
+    const { id, published } = req.body;
+    try {
+      const query = 'UPDATE tourist_entities SET published = ? WHERE id = ?';
+      const [result] = await pool.query(query, [published, id]);
+      if (result.affectedRows > 0) {
+        res.json({ message: 'Post publish status updated successfully' });
+      } else {
+        res.status(404).json({ error: 'Post not found' });
+      }
+    } catch (error) {
+      console.error('Error updating post publish status:', error);
+      res.status(500).json({ error: error.message });
+    }
+  };
+
+  
 export default {
     getAllAdminsHandler,
     getAdminByIdHandler,
@@ -246,5 +286,6 @@ export default {
     verifyPasswordHandler,
     getProfileHandler,
     updateProfileHandler,
-    logoutHandler
+    logoutHandler,
+    updatePostPublishStatus
 };

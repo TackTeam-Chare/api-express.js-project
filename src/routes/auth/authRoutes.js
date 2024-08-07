@@ -4,9 +4,12 @@ import authenticateJWT from '../../middleware/authMiddleware.js';
 const router = express.Router();
 
 
+
 // Admin
 router.post('/login', AuthController.loginHandler); // ไม่ใช้ token
 router.post('/register', AuthController.createAdminHandler); // ไม่ใช้ token
+
+router.put('/admin/post/publish', authenticateJWT, AuthController.updatePostPublishStatus);
 
 // token-based authentication
 router.post('/logout', authenticateJWT,AuthController.logoutHandler); // logout ลบ token
